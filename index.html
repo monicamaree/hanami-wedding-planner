@@ -382,7 +382,93 @@ main::before,.sidebranch,.ph h1::after,.hero svg.pond,.hero svg.branch{display:n
 @media(max-width:860px){.hero{background:linear-gradient(160deg,#FBE9EF 0%,#FCEEE6 26%,#F0F5E7 50%,#E5F0F6 76%,#ECE5F6 100%)!important}}
 #authscreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(60vmax 42vmax at 6% -6%,rgba(127,163,184,.38),transparent 62%),radial-gradient(52vmax 40vmax at 100% 0%,rgba(232,184,193,.5),transparent 62%),var(--ivory)}
 #authscreen[hidden]{display:none!important}#app[hidden]{display:none!important}.authcard{width:100%;max-width:460px;padding:28px;background:rgba(255,253,249,.97);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 60px rgba(127,163,184,.2)}.authbrand{font-family:var(--serif);font-size:2rem;color:var(--pond);display:flex;align-items:center;gap:10px}.authcard h1{font-size:1.65rem;margin:12px 0 6px}.authcard .f{margin-top:12px}.authstatus{min-height:1.4em;color:var(--bad);font-size:.9rem;white-space:pre-wrap}.authactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.authhint{font-size:.82rem;color:var(--grey);margin-top:14px}
+
+/* HANAMI — Dreamy & Ethereal art direction */
+:root{--dream-rose:#C58BA7;--dream-plum:#806783;--dream-blue:#AFCBD9;--dream-lav:#D5C9E8;--dream-sage:#C5D3BE;--dream-gold:#E8D5A8}
+body{background:linear-gradient(135deg,#FFFBF8 0%,#F8EEF3 27%,#EFF6F8 54%,#F5F0FA 78%,#FFF8EB 100%)}
+body::before{opacity:.95;background:
+ radial-gradient(ellipse 48vw 38vw at 4% 8%,rgba(235,196,211,.30),transparent 70%),
+ radial-gradient(ellipse 42vw 34vw at 96% 12%,rgba(184,211,225,.32),transparent 70%),
+ radial-gradient(ellipse 50vw 42vw at 88% 92%,rgba(211,199,232,.30),transparent 70%),
+ radial-gradient(ellipse 38vw 32vw at 8% 100%,rgba(195,211,190,.23),transparent 70%),
+ radial-gradient(ellipse 26vw 22vw at 54% 52%,rgba(239,220,177,.18),transparent 70%)}
+.app{background:transparent}
+.side{background:linear-gradient(180deg,rgba(255,253,250,.94),rgba(250,232,239,.88) 32%,rgba(233,243,248,.9) 66%,rgba(243,237,250,.94));border-right:1px solid rgba(220,204,220,.65);box-shadow:5px 0 30px rgba(112,91,117,.035)}
+.brand{font-size:1.85rem;color:#886985;letter-spacing:.04em}
+.brand small{font-family:'Cormorant Garamond',Georgia,serif;font-size:.8rem;letter-spacing:.19em;text-transform:uppercase;color:#9B879C}
+.nav{border-radius:12px;margin:2px 0;padding:11px 13px;transition:background .2s,transform .2s}
+.nav:hover{background:rgba(255,255,255,.56);transform:translateX(2px)}
+.nav[aria-current=page]{background:linear-gradient(110deg,rgba(249,226,235,.92),rgba(231,241,247,.82),rgba(241,235,249,.86));box-shadow:inset 3px 0 0 #C58BA7}
+.top{background:rgba(255,251,248,.72);backdrop-filter:blur(18px);border-color:rgba(226,213,225,.7)}
+main{max-width:1380px;padding:34px 42px 90px;background:linear-gradient(145deg,rgba(255,255,255,.25),rgba(250,239,247,.18) 36%,rgba(236,246,250,.18) 68%,rgba(255,248,235,.2));border-radius:0 0 28px 28px}
+.ph{min-height:128px;padding:12px 8px 20px;margin-bottom:28px;border-bottom:1px solid rgba(210,190,213,.5)}
+.ph h1{font-family:'Cormorant Garamond',Georgia,serif!important;font-size:clamp(2.4rem,4vw,3.5rem)!important;font-weight:400!important;letter-spacing:.015em;color:#806783!important}
+.ph:after{opacity:.48;filter:saturate(.72)}
+.ph p{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;color:#87788A}
+.hero{border:1px solid rgba(222,204,222,.68);border-radius:24px;padding:48px 46px 38px;min-height:260px;background:
+ radial-gradient(ellipse at 82% 12%,rgba(232,190,211,.40),transparent 43%),
+ radial-gradient(ellipse at 100% 92%,rgba(195,190,225,.36),transparent 45%),
+ radial-gradient(ellipse at 12% 100%,rgba(184,211,225,.36),transparent 48%),
+ rgba(255,253,250,.74)!important;box-shadow:0 18px 50px rgba(111,87,118,.07);backdrop-filter:blur(8px)}
+.hero h1{font-size:clamp(4rem,6vw,5.8rem)!important;color:#886985!important}
+.hero .meta{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.28rem;color:#756A7A;line-height:1.45}
+.hero .acts{margin-top:24px}
+.card,.stat,.modal,.lockcard,.empty,.panel,.boardcard{border:1px solid rgba(218,203,220,.72)!important;border-radius:18px!important;box-shadow:0 12px 34px rgba(105,85,115,.055)!important;backdrop-filter:blur(8px)}
+.card{padding:22px;background:rgba(255,253,251,.78)!important}
+.card h2,.card h3{color:#806783}
+.stat{background:rgba(255,253,251,.78)!important}
+.btn{border-radius:999px!important;padding:9px 17px;border-color:rgba(205,186,209,.75);background:rgba(255,253,251,.8)}
+.btn.primary{background:linear-gradient(115deg,#B77F9D,#988EBB)!important;border-color:#A98AAA!important;box-shadow:0 6px 16px rgba(169,127,159,.18)}
+.btn.primary:hover{background:linear-gradient(115deg,#A96F90,#887CA9)!important}
+.tabs button[aria-selected=true]{background:linear-gradient(110deg,#F8E8EE,#EAF3F7,#F2ECF8)!important;border-color:#D8C5DC!important}
+table.t th{background:rgba(241,235,248,.72)!important;color:#786681}
+table.t tr:nth-child(even) td{background:rgba(232,241,246,.28)!important}
+.dream-gallery{margin:26px 0 30px;padding:26px 28px 30px;border:1px solid rgba(221,205,222,.6);border-radius:24px;background:linear-gradient(125deg,rgba(255,253,250,.66),rgba(249,233,241,.42) 34%,rgba(235,244,248,.42) 68%,rgba(244,237,250,.42));box-shadow:0 14px 40px rgba(111,87,118,.045)}
+.dream-intro{text-align:center;margin-bottom:20px}
+.dream-intro .eyebrow{font-size:.68rem;letter-spacing:.22em;color:#A17E9B}
+.dream-intro h2{font-size:2rem;font-weight:400;color:#806783;margin:2px 0}
+.dream-intro p{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.12rem;color:#887A8A;margin:0}
+.dream-windows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;max-width:1040px;margin:auto}
+.dream-window{position:relative;display:flex;flex-direction:column;align-items:stretch;padding:9px 9px 0;border:1px solid rgba(194,169,198,.75);border-radius:48% 48% 13px 13px/25% 25% 13px 13px;background:linear-gradient(145deg,#fffdfb,#f8edf3 48%,#eaf2f7);cursor:pointer;overflow:hidden;box-shadow:0 9px 25px rgba(104,83,111,.09);transition:transform .25s,box-shadow .25s}
+.dream-window:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(104,83,111,.14)}
+.dream-photo{display:block;width:100%;aspect-ratio:4/3;border-radius:48% 48% 5px 5px/25% 25% 5px 5px;background:
+ radial-gradient(ellipse at 50% 18%,rgba(255,255,255,.8),transparent 36%),
+ linear-gradient(160deg,rgba(233,185,203,.52),rgba(216,233,241,.72) 45%,rgba(216,203,234,.58)),
+ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Cpath d='M0 245Q80 175 150 225T400 205V300H0Z' fill='%23b9cdb8' opacity='.65'/%3E%3Cpath d='M0 265Q100 210 190 250T400 235V300H0Z' fill='%23a8c7d4' opacity='.7'/%3E%3Cg fill='%23fff8fa' opacity='.8'%3E%3Ccircle cx='75' cy='78' r='24'/%3E%3Ccircle cx='112' cy='56' r='16'/%3E%3Ccircle cx='304' cy='88' r='22'/%3E%3C/g%3E%3C/svg%3E") center/cover; background-position:center;background-size:cover;border:5px solid rgba(255,255,255,.78);box-shadow:inset 0 0 0 1px rgba(181,151,188,.32)}
+.dream-window-copy{display:flex;flex-direction:column;gap:1px;padding:12px 8px 14px;text-align:center}
+.dream-window-copy b{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;font-weight:500;color:#78617D}
+.dream-window-copy small{font-size:.75rem;color:#948596}
+.dream-edit{position:absolute;right:17px;top:17px;width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:rgba(255,253,251,.88);color:#8D6D8F;font-size:1.2rem;opacity:0;transition:opacity .2s}
+.dream-window:hover .dream-edit,.dream-window:focus-visible .dream-edit{opacity:1}
+.visual-settings{background:linear-gradient(130deg,rgba(249,232,239,.6),rgba(235,244,248,.55),rgba(243,237,250,.6))!important}
+.visual-thumbs{display:flex;gap:10px;margin:12px 0 16px}
+.visual-thumb{width:76px;height:66px;border-radius:42% 42% 8px 8px;background:linear-gradient(145deg,#f4dfe8,#dcecf1,#e6def2);background-size:cover;background-position:center;border:4px solid rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(100,80,110,.1);display:flex;align-items:end;justify-content:center}
+.visual-thumb small{font-size:.62rem;background:rgba(255,253,251,.85);padding:1px 4px;border-radius:4px;color:#79677C}
+@media(max-width:900px){main{padding:22px 22px 90px}.dream-windows{gap:12px}.dream-gallery{padding:20px 14px}}
+@media(max-width:600px){main{padding:18px 14px 92px}.hero{padding:30px 22px;min-height:230px}.hero h1{font-size:3.8rem!important}.dream-windows{grid-template-columns:1fr;max-width:300px;gap:16px}.dream-window{border-radius:48% 48% 13px 13px/18% 18% 13px 13px}.dream-photo{aspect-ratio:5/3}.dream-gallery{margin:18px 0 24px}.ph{min-height:100px}.ph:after{width:48%;opacity:.35}}
+@media(prefers-reduced-motion:reduce){.dream-window{transition:none}}
 </style>
+<style id="hanami-mobile-top">
+@media(max-width:860px){
+ .top{flex-wrap:wrap;gap:8px 8px;padding:10px 12px;position:static}
+ .top .menu{order:1;flex:0 0 auto}
+ .top .searchbox{order:2;flex:1 1 calc(100% - 90px);max-width:none;min-width:0}
+ .top .searchbox input{width:100%;min-width:0}
+ .top .petalwrap,.top .sv,.top #invitebtn,.top #signoutbtn,.top .btn.primary{order:3}
+ .top .petalwrap,.top .sv,.top #invitebtn,.top #signoutbtn{flex:1 1 auto}
+ .top .petalwrap .btn{width:100%}
+ .top .btn{padding:8px 9px;font-size:.8rem;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+ .top .btn.primary{flex:0 0 auto;padding:8px 14px}
+ .top .petalwrap .btn .pl{display:none}
+ .top .lw{display:none}
+}
+</style>
+<style id="hanami-tabbar-always">
+/* bottom tab bar: always visible on phones and tablets, never scrolls away */
+@media(max-width:860px){
+ .tabbar{display:flex!important;position:fixed!important;left:0;right:0;bottom:0;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
+ main{padding-bottom:96px!important}
+}
 </style>
 </head>
 <body>
@@ -393,7 +479,7 @@ main::before,.sidebranch,.ph h1::after,.hero svg.pond,.hero svg.branch{display:n
   <p class="muted">Sign in to open your shared wedding planner. Your tasks, budget, notes and uploaded inspiration images will sync through Supabase.</p>
   <label class="f"><span>Email address</span><input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com"></label>
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
-  <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button></div>
+  <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
@@ -417,7 +503,7 @@ main::before,.sidebranch,.ph h1::after,.hero svg.pond,.hero svg.branch{display:n
       <div class="searchbox"><label class="sr" for="gs">Search everything</label><input id="gs" type="search" placeholder="Search expenses, guests, tasks, notes…" autocomplete="off"><div class="results" id="results" hidden></div></div>
       <div class="petalwrap"><button class="btn" id="petalbtn" data-act="petalMenu" aria-haspopup="true" aria-expanded="false" title="Change the falling petals">🌸<span class="pl"> Petals</span></button><div class="petalmenu" id="petalmenu" role="menu" aria-label="Falling petals" hidden></div></div>
       <button class="btn sv" id="savebtn" data-act="saveModal">💾 Save</button>
-      <button class="btn" id="invitebtn" data-act="invitePartner">💌 Invite partner</button>
+      <button class="btn" id="invitebtn" data-act="invitePartner">💌 Invite<span class="lw"> partner</span></button>
       <button class="btn" id="signoutbtn" data-act="signOut">Sign out</button>
       <button class="btn primary" data-act="quickadd">+ Add</button>
     </div>
@@ -816,11 +902,21 @@ async function hydrateImages(){
 }
 async function showAuthError(message){const el=$('#auth-status');if(el)el.textContent=message}
 async function invitePartner(){
- const email=prompt('Enter Nick’s email address. He will need to create his own Hanami account using this exact email address:');
- if(!email)return;const clean=email.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(clean)){toast('Please enter a valid email address.');return}
- const {error}=await supabaseClient.from('wedding_invites').upsert({plan_id:planId,invited_by:currentUser.id,email:clean,role:'editor'},{onConflict:'plan_id,email'});
- if(error){console.error(error);toast('Could not invite partner. Check the Supabase SQL setup and try again.');return}
- toast('Invitation recorded. Nick should create an account using '+clean+'. When he signs in, Hanami will connect him to this plan.');
+ if(!supabaseClient||!planId||!currentUser){toast('Sign in first, then try again.');return}
+ modal(`<div class="mh"><h2>💌 Invite your partner</h2><button class="btn sm" data-act="close">Close</button></div><p class="muted small">Enter the email address your partner will use. They create their own Hanami account with that exact email, and when they sign in they are connected to your plan.</p><label class="f"><span>Partner’s email</span><input id="invEmail" type="email" inputmode="email" autocomplete="off" placeholder="name@example.com"></label><p class="small" id="invMsg" role="status"></p><div class="acts"><button class="btn primary" id="invSend" data-act="inviteSend">Send invite</button></div>`);
+ setTimeout(()=>{const i=$('#invEmail');if(i)i.focus()},50);
+}
+async function inviteSend(){
+ const msg=$('#invMsg'),btn=$('#invSend'),clean=(($('#invEmail')||{}).value||'').trim().toLowerCase();
+ if(!/^\S+@\S+\.\S+$/.test(clean)){msg.textContent='Please enter a valid email address.';return}
+ btn.disabled=true;msg.textContent='Saving…';
+ try{
+  const {error}=await supabaseClient.from('wedding_invites').upsert({plan_id:planId,invited_by:currentUser.id,email:clean,role:'editor'},{onConflict:'plan_id,email'});
+  if(error)throw error;
+  msg.innerHTML='✅ Invitation saved. Ask your partner to create an account at this site using <b>'+esc(clean)+'</b>, then sign in. They will be connected automatically. You can also share the site link with them.';
+  btn.textContent='Done';btn.dataset.act='close';
+ }catch(e){console.error(e);msg.textContent='Could not save the invite: '+(e.message||e)+'. If this mentions "wedding_invites" or "policy", run the setup SQL again in Supabase.'}
+ finally{btn.disabled=false}
 }
 async function authStart(mode){
  if(authBusy)return;authBusy=true;const btn=$('#auth-'+mode),email=$('#auth-email').value.trim().toLowerCase(),password=$('#auth-password').value;
@@ -971,7 +1067,7 @@ const ENT={
  link:{coll:'links',label:'Link',page:'studio',title:r=>r.title,fields:[
   {k:'title',l:'Title',t:'text',req:1},{k:'url',l:'URL',t:'url',req:1},{k:'category',l:'Category',t:'select',o:opt(['Pinterest','Instagram','Figma','Miro','Google Drive','Google Docs','Google Sheets','Canva','Website','Video','Other'])},
   {k:'tags',l:'Tags (comma separated)',t:'tags'},{k:'board',l:'🎨 Design board',t:'select',o:()=>boardOpts()},{k:'notes',l:'Notes',t:'textarea',wide:1}]},
- board:{coll:'boards',label:'Moodboard',page:'studio',title:r=>r.name,fields:[{k:'name',l:'Board name',t:'text',req:1}]},
+ board:{coll:'boards',label:'Moodboard',page:'studio',title:r=>r.name,fields:[{k:'name',l:'Board name',t:'text',req:1},{k:'link',l:'Pinterest / inspiration board link (optional)',t:'url',wide:1}]},
  palette:{coll:'palettes',label:'Palette',page:'studio',title:r=>r.name,defaults:()=>({colors:['#E8B8C1','#A8B5A0','#B8C9D4']}),fields:[{k:'name',l:'Palette name',t:'text',req:1}]},
  table:{coll:'tables',label:'Seating object',page:'seating',title:r=>r.name,fields:[{k:'name',l:'Name',t:'text',req:1},{k:'cap',l:'Seats',t:'number'},{k:'w',l:'Width (px)',t:'number'},{k:'h',l:'Height (px)',t:'number'}]},
  payment:{custom:1,label:'Payment',page:'budget',fields:[
@@ -980,7 +1076,8 @@ const ENT={
   {k:'title',l:'Wedding title',t:'text',req:1,wide:1},{k:'names',l:'Your names (for the welcome message)',t:'text',wide:1},{k:'date',l:'Wedding date (leave blank if not confirmed)',t:'date'},{k:'location',l:'Ceremony location',t:'text'},
   {k:'budget',l:'Working budget',t:'money',req:1},{k:'guests',l:'Approximate guest count',t:'number'},{k:'min',l:'Minimum budget target',t:'money'},{k:'max',l:'Maximum budget target',t:'money'},
   {k:'currency',l:'Currency',t:'select',o:opt(['AUD','NZD','USD','GBP','EUR','CAD'])},{k:'style',l:'Style',t:'text'},
-  {k:'petals',l:'',cl:'Show falling petals when Hanami opens',t:'checkbox'},{k:'petalStyle',l:'Falling petal style',t:'select',o:()=>Object.entries(PETALS).map(([k,v])=>[k,v.icon+' '+v.name])},{k:'quoteAlertPct',l:'Alert when a quote exceeds the estimate by (%)',t:'number'},{k:'dueDays',l:'Warn about payments due within (days)',t:'number'}]}
+  {k:'petals',l:'',cl:'Show falling petals when Hanami opens',t:'checkbox'},{k:'petalStyle',l:'Falling petal style',t:'select',o:()=>Object.entries(PETALS).map(([k,v])=>[k,v.icon+' '+v.name])},{k:'quoteAlertPct',l:'Alert when a quote exceeds the estimate by (%)',t:'number'},{k:'dueDays',l:'Warn about payments due within (days)',t:'number'},
+  {k:'windowImage1',l:'Dreamy window 1 — venue inspiration',t:'image',wide:1},{k:'windowImage2',l:'Dreamy window 2 — ceremony & florals',t:'image',wide:1},{k:'windowImage3',l:'Dreamy window 3 — little details',t:'image',wide:1}]}
 };
 let FORM=null;
 ENT.task.fields.forEach((f,i)=>{if(i>1)f.late=1});
@@ -1070,7 +1167,7 @@ function render(){
  $('#nav').innerHTML=NAV.map(([k,l])=>`<button class="nav" data-act="go" data-p="${k}" ${U.page===k?'aria-current="page"':''}><span class="ne">${PEMO[k]}</span> ${l}${navBadge(k)}</button>`).join('');
  const bs=$('#backstat');if(bs)bs.textContent=S.settings.lastBackup?'💾 Last backup file: '+fdate(S.settings.lastBackup.slice(0,10)):'💾 No backup file saved yet';
  const sb=$('#savebtn');if(sb&&sb.classList)sb.classList.toggle('nudge',!!needBackup());
- const tb=$('#tabbar');if(tb)tb.innerHTML=[['dashboard','Home'],['budget','Budget'],['tasks','Tasks'],['guests','Guests'],['studio','Studio']].map(([k,l])=>`<button data-act="go" data-p="${k}" ${U.page===k?'aria-current="page"':''}><span>${PEMO[k]}</span>${l}</button>`).join('')+'<button data-act="jump"><span>🧭</span>Jump</button>';
+ const tb=$('#tabbar');if(tb)tb.innerHTML=barTabs().map(([k,l])=>`<button data-act="go" data-p="${k}" ${U.page===k?'aria-current="page"':''}><span>${PEMO[k]}</span>${l}</button>`).join('')+'<button data-act="jump"><span>🧭</span>Jump</button>';
  const ae=document.activeElement,aid=ae&&ae.id&&$('#main').contains(ae)?ae.id:null,pos=aid&&ae.selectionStart!=null?ae.selectionStart:null;
  $('#main').innerHTML=PAGES[U.page]()+pager();
  if(aid){const n=document.getElementById(aid);if(n){n.focus();if(pos!=null)try{n.setSelectionRange(pos,pos)}catch(e){}}}
@@ -1257,12 +1354,23 @@ function pageDashboard(){
  const order=S.ui.order.filter(k=>!S.ui.hidden.includes(k)&&W[k]);
  const branch=`<span class="bl2 bl-back" aria-hidden="true"></span><span class="bl2 bl-front" aria-hidden="true"></span>`;
  return `<section class="hero">${branch}<h1>${esc(s.title)}</h1><div class="meta">${s.names?`Welcome back, ${esc(s.names)}. `:'Welcome. '}${cd}<br><span class="muted">${esc(status)}</span></div><div class="acts"><button class="btn primary" data-act="quickadd">+ Quick add</button><button class="btn" data-act="custDash">Customise dashboard</button><button class="btn" data-act="petals">Scatter petals</button></div></section>
+ <section class="dream-gallery" aria-label="Wedding inspiration windows">
+  <div class="dream-intro"><span class="eyebrow">A LITTLE WINDOW INTO YOUR DAY</span><h2>Collected dreams</h2><p>Places, moments and details that feel like you.</p></div>
+  <div class="dream-windows">
+   ${[['windowImage1','Venue inspiration','A place to celebrate'],['windowImage2','Ceremony & florals','The setting for your vows'],['windowImage3','The little details','All the things you love']].map(([k,t,c],i)=>`<button type="button" class="dream-window dw${i+1}" data-act="open" data-ent="settings" aria-label="Change ${t.toLowerCase()} image"><span class="dream-photo" ${s[k]?`style="background-image:url('${esc(s[k])}')"`:''}></span><span class="dream-window-copy"><b>${t}</b><small>${s[k]?'Your inspiration':'Add a photo or inspiration'}</small></span><span class="dream-edit">＋</span></button>`).join('')}
+  </div>
+ </section>
  ${hasEx?`<div class="alert info"><span>Example data is loaded so you can see how things work. It is clearly marked “Example”.</span><button class="btn sm" data-act="rmExample">Remove example data</button></div>`:''}
  ${!S.expenses.length&&!hasEx?`<div class="alert info"><span>Starting empty. Want to see Hanami with sample records first?</span><button class="btn sm" data-act="loadExample">Load example data</button></div>`:''}
  ${needBackup()?`<div class="alert warn"><span>💾</span><span style="flex:1">${S.settings.lastBackup?'It’s been over a week since your last backup file.':'You haven’t saved a backup file yet.'} Save a copy so you can’t lose your plans.</span><button class="btn sm" data-act="saveModal">Save a copy</button></div>`:''}
  ${alerts().slice(0,3).map(a=>`<div class="alert ${a.l}"><span>${a.l==='bad'?'⚠':a.l==='warn'?'◷':'ℹ'}</span><span>${esc(a.t)}</span></div>`).join('')}
  <div class="grid g2">${order.map(k=>W[k]()).join('')}</div>`;
 }
+const TABSHORT={dashboard:'Home',budget:'Budget',venues:'Venues',suppliers:'Suppliers',tasks:'Tasks',guests:'Guests',studio:'Studio',seating:'Seating',runsheet:'Big day',notes:'Notes',private:'Private',settings:'Settings'};
+const TABDEF=['dashboard','budget','tasks','guests','studio'];
+function barTabs(){const raw=Array.isArray(S.settings.tabs)?S.settings.tabs:TABDEF;const seen=new Set(),out=[];for(const k of raw){if(k&&TABSHORT[k]&&!seen.has(k)){seen.add(k);out.push([k,TABSHORT[k]])}}return out.length?out:TABDEF.map(k=>[k,TABSHORT[k]])}
+function custBar(){const cur=barTabs().map(x=>x[0]);const slots=[0,1,2,3,4].map(i=>cur[i]||'');
+ modal(`<div class="mh"><h2>Customise bottom bar</h2><button class="btn sm" data-act="close">Close</button></div><p class="muted small">Choose up to 5 pages for the bar at the bottom of your phone screen. The 🧭 Jump button always stays, so you can reach everything else. Saved for both of you.</p>${slots.map((v,i)=>`<label class="f"><span>Button ${i+1}</span><select data-chg="barSlot" data-i="${i}"><option value="">— none —</option>${NAV.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${PEMO[k]||''} ${l}</option>`).join('')}</select></label>`).join('')}<div class="acts"><button class="btn" data-act="barReset">Reset to default</button><button class="btn primary" data-act="close">Done</button></div>`)}
 function custDash(){
  modal(`<div class="mh"><h2>Customise dashboard</h2><button class="btn sm" data-act="close">Close</button></div><p class="muted small">Show, hide and reorder widgets. Your layout is saved.</p>${S.ui.order.map((k,i)=>`<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><label class="chk" style="margin:0"><input type="checkbox" data-chg="wShow" data-k="${k}" ${S.ui.hidden.includes(k)?'':'checked'}> ${WN[k]}</label><span class="acts"><button class="btn sm" data-act="wMove" data-k="${k}" data-d="-1" ${i===0?'disabled':''} aria-label="Move ${WN[k]} up">↑</button><button class="btn sm" data-act="wMove" data-k="${k}" data-d="1" ${i===S.ui.order.length-1?'disabled':''} aria-label="Move ${WN[k]} down">↓</button></span></div>`).join('')}`);
 }
@@ -1472,7 +1580,7 @@ function scopeTabsRow(id,key){
 }
 function boardPanel(b,its,all){
  const bt=U.tab.bt||'pics',{T,N,E,Lk}=scopeSets(b.id);
- const head=`<div class="row" style="margin-bottom:8px;flex-wrap:wrap"><h2>🎨 ${esc(b.name)}</h2><div class="acts"><button class="btn sm" data-act="open" data-ent="board" data-id="${b.id}">Rename</button><button class="btn sm" data-act="dupBoard" data-id="${b.id}">Duplicate</button><button class="btn sm danger" data-act="delBoard" data-id="${b.id}">Delete</button></div></div>`;
+ const head=`<div class="row" style="margin-bottom:8px;flex-wrap:wrap"><h2>🎨 ${esc(b.name)}</h2><div class="acts">${/^https?:\/\//i.test(b.link||'')?`<a class="btn sm" href="${esc(b.link)}" target="_blank" rel="noopener">📌 Open board link</a>`:''}<button class="btn sm" data-act="open" data-ent="board" data-id="${b.id}">Rename / board link</button><button class="btn sm" data-act="dupBoard" data-id="${b.id}">Duplicate</button><button class="btn sm danger" data-act="delBoard" data-id="${b.id}">Delete</button></div></div>`;
  const tb=tabs('bt',[['pics','🖼️ Pictures ('+all+')'],['tasks','✅ Checklist ('+T.filter(isOpen).length+')'],['notes','📝 Notes ('+N.length+')'],['spend','💰 Spending ('+E.length+')'],['links','🔗 Links ('+Lk.length+')']],bt);
  let c='';
  const isort=(S.ui&&S.ui.isort)||'custom',iview=(S.ui&&S.ui.iview)||'masonry';
@@ -1499,15 +1607,16 @@ function pageStudio(){
  return hdr('Design studio','Moodboards, colour palettes and reference links.')+tabs('studio',[['boards','🖼️ Moodboards'],['palettes','🎨 Colour palettes'],['links','🔗 Links']],tab)+body;
 }
 function addImageModal(){
- modal(`<div class="mh"><h2>Add images</h2><button class="btn sm" data-act="close">Close</button></div><label class="f"><span>Upload from your device</span><input type="file" id="imgfiles" accept="image/*" multiple></label><label class="f"><span>Or paste an image link (https://…)</span><input id="imgurl" type="url" placeholder="https://"></label><div class="err" id="ferr" role="alert"></div><p class="small muted">Uploads are resized and stored with your data. Large collections may hit storage limits; you’ll see a message if so.</p><div class="mf"><span></span><div class="acts"><button class="btn" data-act="close">Cancel</button><button class="btn primary" id="fsave" data-act="saveImages">Add to board</button></div></div>`);
+ modal(`<div class="mh"><h2>Add images</h2><button class="btn sm" data-act="close">Close</button></div><label class="f"><span>Upload from your device</span><input type="file" id="imgfiles" accept="image/*" multiple></label><label class="f"><span>Or paste image links, one per line (https://…)</span><textarea id="imgurl" rows="5" placeholder="https://i.pinimg.com/…jpg&#10;https://i.pinimg.com/…jpg"></textarea></label><p class="small muted">Pinterest tip: on a pin, right-click the picture and choose “Copy image address”, then paste it here. A link to the pin page itself (pinterest.com/pin/…) isn’t a picture, so it won’t work. To add many pins at once, download them and use “Upload from your device” (you can pick lots of files together).</p><div class="err" id="ferr" role="alert"></div><p class="small muted">Uploads are resized and stored with your data. Large collections may hit storage limits; you’ll see a message if so.</p><div class="mf"><span></span><div class="acts"><button class="btn" data-act="close">Cancel</button><button class="btn primary" id="fsave" data-act="saveImages">Add to board</button></div></div>`);
 }
 async function saveImages(){
- const files=[...($('#imgfiles').files||[])],url=$('#imgurl').value.trim(),btn=$('#fsave');
- if(!files.length&&!url){$('#ferr').textContent='Choose a file or paste an image link.';return}
- if(url&&!/^https?:\/\//i.test(url)){$('#ferr').textContent='Image links must start with http:// or https://';return}
+ const files=[...($('#imgfiles').files||[])],urls=($('#imgurl').value||'').split(/[\s,]+/).filter(Boolean),btn=$('#fsave');
+ if(!files.length&&!urls.length){$('#ferr').textContent='Choose files or paste image links.';return}
+ const badU=urls.find(u=>!/^https?:\/\//i.test(u));if(badU){$('#ferr').textContent='Image links must start with http:// or https://';return}
+ const pinPage=urls.find(u=>(/pinterest\.[a-z.]+\/(pin|[^/]+\/[^/]+)\/?/i.test(u)||/\/\/pin\.it\//i.test(u))&&!/pinimg\.com/i.test(u));if(pinPage){$('#ferr').textContent='That looks like a Pinterest page link, not a picture. Right-click the picture and choose “Copy image address” (it starts with https://i.pinimg.com).';return}
  btn.disabled=true;btn.textContent='Adding…';const add=[],fail=[];
  for(const f of files){try{add.push(await readImg(f))}catch(e){fail.push(f.name)}}
- if(url)add.push(url);
+ urls.forEach(u=>add.push(u));
  if(!add.length){$('#ferr').textContent='Those files couldn’t be read as images.';btn.disabled=false;btn.textContent='Add to board';return}
  const prev=S.items.length;add.forEach(src=>S.items.push({id:uid(),board:U.board,src,note:'',tags:[],status:'',fav:false}));
  const ok=await commit('items');
@@ -1672,11 +1781,13 @@ function pageNotes(){
 function pageSettings(){
  const s=S.settings;
  return hdr('Settings','')+`<div class="grid g2"><div class="card"><h2>Wedding details</h2><p class="muted small">${esc(s.title)} · ${s.date?fdate(s.date):'date not confirmed'} · ${esc(s.location||'')} · budget ${fmt(s.budget)} · about ${s.guests||0} guests</p><button class="btn primary" data-act="open" data-ent="settings">Edit details and alert thresholds</button></div>
+ <div class="card visual-settings"><h2>Visual atmosphere</h2><p class="muted small">Make Hanami feel like your wedding. Add real venue photos, floral inspiration or any images you love — they’ll appear in the dreamy windows on your dashboard and sync with your shared plan.</p><div class="visual-thumbs">${['windowImage1','windowImage2','windowImage3'].map((k,i)=>`<span class="visual-thumb" ${s[k]?`style="background-image:url('${esc(s[k])}')"`:''}><small>${['Venue','Ceremony','Details'][i]}</small></span>`).join('')}</div><button class="btn primary" data-act="open" data-ent="settings">Change window images</button></div>
  <div class="card"><h2>Planning framework</h2><p class="muted small">${S.tasks.filter(t=>t.seed).length} framework tasks and ${S.decisions.filter(d=>d.sk).length} decisions are in your project. Adding again only fills in anything missing and never changes your own records.</p><div class="acts"><button class="btn" data-act="offerFw">Add missing planning records</button>${s.date?`<button class="btn" data-act="propose">Propose a schedule</button>`:''}</div></div>
  <div class="card"><h2>Password lock</h2><p class="muted small">${LOCKREC?'A password is needed to open Hanami, and it locks after 15 minutes of inactivity. This is a screen lock, not encryption.':'No password is set on this device.'}</p><div class="acts">${LOCKREC?'<button class="btn" data-act="lockNow">Lock now</button><button class="btn" data-act="chpw">Change password</button>':''}</div></div>
  <div class="card"><h2>Dashboard</h2><p class="muted small">Choose which widgets appear and their order.</p><button class="btn" data-act="custDash">Customise dashboard</button></div>
+ <div class="card"><h2>Bottom bar (phone)</h2><p class="muted small">Choose which pages appear in the tab bar at the bottom of your phone screen.</p><button class="btn" data-act="custBar">Customise bottom bar</button></div>
  <div class="card"><h2>Your data</h2><p class="muted small">Stored with this artifact on your account. Back it up regularly.</p><div class="acts"><button class="btn primary" data-act="saveModal">💾 Save a copy or PDF</button><button class="btn danger" data-act="resetAll">Delete all data</button></div></div>
- <div class="card"><h2>What this prototype doesn’t do</h2><p class="small">No sign-in, partner invitations, roles or activity history yet: those need a real backend such as Supabase. No document library, accommodation tracker, budget scenarios or calendar sync either. Reminders appear in the app only; nothing is emailed or synced to a calendar.</p></div></div>`;
+ <div class="card"><h2>What Hanami doesn’t do (yet)</h2><p class="small">Sign-in, partner invitations and cloud saving are switched on through Supabase. Not included yet: roles beyond editor, an activity history, a document library, an accommodation tracker, budget scenarios or calendar sync. Reminders appear in the app only; nothing is emailed or synced to a calendar.</p></div></div>`;
 }
 /* ============ private vaults (encrypted, separate passcodes) ============ */
 let VDEF={dress:{e:'👗',n:'Dress',sug:['Browse styles and save favourites','Book try-on appointments','Choose the dress','Order and pay the deposit','Plan fittings and alterations','Choose veil, shoes and accessories','Choose underlayers','Final fitting','Plan collection and transport','Plan storage until the day']},suit:{e:'🤵',n:'Groom’s suit',sug:['Decide style and colour','Get measured','Buy or hire the suit','Book tailoring','Choose shirt, tie, shoes and belt','Choose accessories','Final fitting','Plan collection and transport','Plan storage until the day']}};
@@ -1867,7 +1978,8 @@ vopen:el=>{const id=el.dataset.v;U.vtabNext=el.dataset.tab||'tasks';if(VAULT[id]
  goCat:el=>go('budget',{bf:{cat:el.dataset.id,status:'',q:'',mode:'all'}}),
  clrBf:()=>{U.bf={cat:'',status:'',q:'',mode:'all'};render()},
  tab:el=>{U.tab[el.dataset.k]=el.dataset.v;render()},
- custDash,
+ custDash,custBar,
+ barReset:async()=>{delete S.settings.tabs;await commit('settings');custBar();render()},
  wMove:el=>{const o=S.ui.order,i=o.indexOf(el.dataset.k),j=i+(+el.dataset.d);if(j<0||j>=o.length)return;[o[i],o[j]]=[o[j],o[i]];commit('ui');custDash();render()},
  loadExample,rmExample,
  saveQuick:async()=>{const v=$('#qn').value.trim();if(!v){toast('Write something first');return}S.notes.push({id:uid(),created:Date.now(),title:v.split('\n')[0].slice(0,60),body:v,tags:[]});const ok=await commit('notes');if(ok){$('#qn').value='';toast('Note saved')}else toast('Couldn’t save the note')},
@@ -1942,6 +2054,7 @@ document.addEventListener('change',async e=>{
   case 'bhide':U.bhide=el.checked;break;
   case 'vdone':{const t=VAULT[U.vault].tasks.find(x=>x.id===el.dataset.id);t.done=el.checked;await vSaveToast();break}
   case 'subDone':{const t=S.tasks.find(x=>x.id===el.dataset.id);t.subs[+el.dataset.i].done=el.checked;await commit('tasks');break}
+  case 'barSlot':{const cur=barTabs().map(x=>x[0]);const a=[0,1,2,3,4].map(i=>cur[i]||'');a[+el.dataset.i]=v;S.settings.tabs=a.filter(Boolean);await commit('settings');render();custBar();return}
   case 'wShow':{const h=S.ui.hidden;const i=h.indexOf(el.dataset.k);if(el.checked&&i>=0)h.splice(i,1);if(!el.checked&&i<0)h.push(el.dataset.k);await commit('ui');break}
   case 'score':{const vn=S.venues.find(x=>x.id===el.dataset.id);vn.scores=vn.scores||{};vn.scores[el.dataset.c]=v;await commit('venues');break}
   case 'crit':{S.ui.crit.find(c=>c.id===el.dataset.id).on=el.checked;await commit('ui');break}
@@ -2051,20 +2164,40 @@ document.addEventListener('click',e=>{
  if(c)st[card.dataset.cx]=1;else delete st[card.dataset.cx];setCx(card,c);cxBar();cxSave()});
 
 A.invitePartner=async()=>{await invitePartner()};
+A.inviteSend=async()=>{await inviteSend()};
 A.signOut=async()=>{if(confirm('Sign out of Hanami? Make sure the save status says all changes are saved.')){lockAllVaults();await supabaseClient.auth.signOut();}};
 
 // Cloud-first startup. Authentication controls access to the shared plan; each private vault is stored in a separate user-scoped table.
 $('#app').hidden=true;
 if(!supaReady){showAuthError('Supabase is not configured yet. Add your Project URL and publishable key to hanami-config.js, then publish that file with the planner.');}
+let recovering=/type=recovery/.test(location.hash||'');
+function showRecovery(){
+ recovering=true;$('#app').hidden=true;$('#authscreen').hidden=false;
+ const ac=document.querySelector('#authscreen .authactions');if(ac)ac.hidden=true;
+ if(!$('#recbox')){const d=document.createElement('div');d.id='recbox';d.style.cssText='margin-top:14px';d.innerHTML='<p class="small"><b>Choose a new password</b> (at least 8 characters).</p><label class="f"><span>New password</span><input id="rec-pw" type="password" autocomplete="new-password"></label><div class="acts"><button class="btn primary" id="rec-save" type="button">Save new password</button></div>';$('#auth-status').before(d);
+  $('#rec-save').addEventListener('click',async()=>{const pw=$('#rec-pw').value;if(pw.length<8){showAuthError('Use a password with at least 8 characters.');return}
+   showAuthError('Saving…');const {data,error}=await supabaseClient.auth.updateUser({password:pw});if(error){showAuthError(error.message);return}
+   try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+   recovering=false;currentUser=data.user;d.remove();if(ac)ac.hidden=false;showAuthError('');try{await enterPlanner()}catch(e){showAuthError(e.message||String(e))}});}
+ showAuthError('Set a new password to continue.');
+}
+$('#auth-forgot').addEventListener('click',async()=>{
+ if(!supaReady){showAuthError('Supabase is not configured yet.');return}
+ const email=$('#auth-email').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){showAuthError('Type your email above first, then click “Forgot password?”.');return}
+ showAuthError('Sending…');const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+ showAuthError(error?error.message:'If that email has an account, a reset link is on its way. Open it on this device, then choose a new password.');
+});
 $('#auth-signin').addEventListener('click',()=>authStart('signin'));
 $('#auth-signup').addEventListener('click',()=>authStart('signup'));
 $('#auth-password').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();authStart('signin')}});
 if(supabaseClient){
  supabaseClient.auth.getSession().then(async({data,error})=>{
   if(error){showAuthError(error.message);return}
+  if(recovering&&data.session){currentUser=data.session.user;showRecovery();return}
   if(data.session){currentUser=data.session.user;try{await enterPlanner()}catch(e){console.error(e);$('#app').hidden=true;$('#authscreen').hidden=false;showAuthError('Signed in, but Hanami could not load the shared plan. Check that you ran supabase-setup.sql. Details: '+(e.message||e))}}
  });
  supabaseClient.auth.onAuthStateChange(async(event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){currentUser=session&&session.user;showRecovery();return}
   if(event==='SIGNED_OUT'){currentUser=null;planId=null;lockAllVaults();$('#app').hidden=true;$('#authscreen').hidden=false;}
  });
 }
