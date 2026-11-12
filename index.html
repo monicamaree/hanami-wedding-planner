@@ -2292,22 +2292,22 @@ main{background:linear-gradient(180deg,rgba(255,249,247,.10),rgba(255,249,247,.2
 </style>
 
 <style id="hanami-arch-curtain-fix">
-:root{--arch-ratio:4/5}
-/* Curtain: its own fixed layer, whole picture stretched to the screen (no zoomed-in crop, works on iPhone too) */
+:root{--arch-ratio:2/3;--arch-border:3px;--arch-radius:50% 50% 14px 14px/33% 33% 14px 14px}
+/* Curtain: its own fixed layer, scaled to cover the screen without distorting the artwork */
 html{background:#f8eeeb}
 html body{background:none!important}
-#curtain{position:fixed;inset:0;z-index:-2;pointer-events:none;background-color:#f8eeeb;background-image:var(--curtain-wallpaper);background-repeat:no-repeat;background-position:center;background-size:100% 100%}
-/* Home arches */
-.dream-photo{aspect-ratio:var(--arch-ratio)!important}
-/* Page-header arches: same shape and proportions as the home ones */
-html body main .ph{--aw:180px;min-height:calc(var(--aw)*1.25 + 44px)!important;padding-right:calc(var(--aw) + 70px)!important}
-html body main .ph:after{box-sizing:border-box!important;width:var(--aw)!important;height:calc(var(--aw)/(4/5))!important;right:28px!important;top:50%!important;transform:translateY(-50%)!important;border:8px solid rgba(255,255,255,.62)!important;outline:0!important;border-radius:50% 50% 16px 16px/30% 30% 16px 16px!important;box-shadow:0 18px 40px rgba(138,93,99,.16),inset 0 0 0 1px rgba(255,255,255,.7)!important}
-/* Your photo: fills the arch top to bottom, sides trimmed, no tint on top */
+#curtain{position:fixed;inset:0;z-index:-2;pointer-events:none;background-color:#f8eeeb;background-image:var(--curtain-wallpaper);background-repeat:no-repeat;background-position:center top;background-size:cover}
+/* One arch shape everywhere: tall, slim, delicate border */
+.dream-photo{aspect-ratio:var(--arch-ratio)!important;border:var(--arch-border) solid rgba(255,255,255,.72)!important;border-radius:var(--arch-radius)!important;box-shadow:0 14px 34px rgba(138,93,99,.13)!important}
+html body main .ph{--aw:170px;min-height:calc(var(--aw)*1.5 + 44px)!important;padding-right:calc(var(--aw) + 70px)!important}
+html body main .ph:after{box-sizing:border-box!important;width:var(--aw)!important;height:calc(var(--aw)*1.5)!important;right:28px!important;top:50%!important;transform:translateY(-50%)!important;border:var(--arch-border) solid rgba(255,255,255,.72)!important;outline:0!important;border-radius:var(--arch-radius)!important;box-shadow:0 14px 34px rgba(138,93,99,.13)!important}
+/* Your photo fills the arch top to bottom, sides trimmed, no tint */
 html body main.has-arch .ph:after{background-image:var(--arch-image)!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;background-color:transparent!important}
 @media(max-width:760px){
- html body main .ph{--aw:120px;min-height:0!important;padding-right:20px!important;padding-bottom:calc(var(--aw)*1.25 + 36px)!important}
+ html body main .ph{--aw:110px;min-height:0!important;padding-right:20px!important;padding-bottom:calc(var(--aw)*1.5 + 36px)!important}
  html body main .ph:after{top:auto!important;bottom:14px!important;right:14px!important;transform:none!important}
 }
+@media(max-width:600px){.dream-photo{border-width:2px!important}}
 /* Settings previews show the real arch shape */
-.visual-preview{height:auto!important;aspect-ratio:var(--arch-ratio);border-radius:50% 50% 12px 12px/30% 30% 12px 12px!important;background-size:cover!important;background-position:center!important;border:6px solid rgba(255,255,255,.62)!important}
+.visual-preview{height:auto!important;aspect-ratio:var(--arch-ratio);border-radius:var(--arch-radius)!important;background-size:cover!important;background-position:center!important;border:2px solid rgba(255,255,255,.72)!important}
 </style>
