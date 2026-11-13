@@ -469,7 +469,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
   <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
-  <p class="small muted" id="ver" style="margin-top:10px">Version: v8 calendar, reminders, DIY, venues, 13 Nov 2026</p>
+  <p class="small muted" id="ver" style="margin-top:10px">Version: v10 Google events sync, 13 Nov 2026</p>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
 </div>
@@ -935,7 +935,7 @@ async function enterPlanner(){
 const CATNAMES=['Venue hire','Catering','Alcohol and beverages','Ceremony','Photography','Videography','Florals','Styling and decor','Furniture and equipment hire','Lighting and production','Entertainment and music','Wedding attire','Hair and makeup','Rings and jewellery','Stationery and invitations','Cake and desserts','Celebrant','Transport','Accommodation','Guest favours','Gifts','Wedding planner','Legal and administrative','Insurance','Post-wedding expenses','Miscellaneous','Contingency'];
 const SPLIT={'Venue hire':20,'Catering':20,'Alcohol and beverages':6,'Ceremony':2,'Photography':8,'Videography':4,'Florals':6,'Styling and decor':5,'Furniture and equipment hire':3,'Lighting and production':2,'Entertainment and music':5,'Wedding attire':5,'Hair and makeup':2,'Rings and jewellery':2,'Stationery and invitations':1,'Cake and desserts':1,'Celebrant':1,'Transport':1,'Guest favours':1,'Contingency':5};
 const DEF={
- settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
+ settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
  cats:CATNAMES.map((n,i)=>({id:'c'+i,name:n,alloc:0,color:COLORS[i%COLORS.length],arch:false})),
  expenses:[],tasks:[],appts:[],reminders:[],diy:[],venues:[],suppliers:[],guests:[],items:[],palettes:[],links:[],tables:[],runsheet:[],notes:[],decisions:[],
  boards:['Overall wedding vision','Ceremony','Reception','Flowers','Tablescapes','Wedding attire','Stationery','Lighting'].map((n,i)=>({id:'b'+i,name:n})),
@@ -1476,17 +1476,18 @@ function icsText(list){const e2=t=>String(t||'').replace(/\\/g,'\\\\').replace(/
  out.push('END:VCALENDAR');return out.join('\r\n')}
 const apptWhen=a=>{const d=new Date(a.date+'T12:00:00');const day=isNaN(d)?a.date:d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});return day+(a.start?' · '+a.start+(a.end?'–'+a.end:''):' · all day')};
 
-const CALK={appt:['#7fa6b8','Appointment'],pay:['#c9a56a','Payment due'],task:['#8fa88c','Task due'],rem:['#c9808f','Reminder'],wed:['#a898c8','Wedding day']};
+const CALK={appt:['#7fa6b8','Appointment'],pay:['#c9a56a','Payment due'],task:['#8fa88c','Task due'],rem:['#c9808f','Reminder'],wed:['#a898c8','Wedding day'],gcal:['#6b8fd1','Google Calendar']};
 function calEvents(){
  const m={},add=(d,e)=>{if(!d)return;(m[d]=m[d]||[]).push(e)};
  (S.appts||[]).forEach(a=>a.date&&add(a.date,{k:'appt',t:a.title,time:a.start,ent:'appt',id:a.id,ex:a}));
  allPayments().filter(p=>!p.paid&&p.due).forEach(p=>{const t=(p.label||'Payment')+' · '+p.exp.name+' ('+fmt(p.amt)+')';add(p.due,{k:'pay',t,ent:'expense',id:p.exp.id,ex:{id:'pay'+(p.id||p.exp.id),title:'Payment due: '+t,date:p.due}})});
  S.tasks.filter(t=>isOpen(t)&&t.due).forEach(t=>add(t.due,{k:'task',t:t.title,ent:'task',id:t.id,ex:{id:'task'+t.id,title:'Task due: '+t.title,date:t.due}}));
  (S.reminders||[]).filter(r=>!r.done&&r.date).forEach(r=>add(r.date,{k:'rem',t:r.title,time:r.time,ent:'reminder',id:r.id,ex:{id:r.id,title:r.title,date:r.date,start:r.time,notes:r.notes}}));
+ (U.gev||[]).forEach(g=>add(g.date,{k:'gcal',t:g.title,time:g.time,ent:'',ex:{id:'g'+g.id,title:g.title,date:g.date}}));
  if(S.settings.date)add(S.settings.date,{k:'wed',t:'Our wedding day 💍',ent:'',ex:{id:'wedding',title:'Our wedding day',date:S.settings.date}});
  Object.values(m).forEach(a=>a.sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')));
  return m}
-function evRow(e,d,i){const c=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${c[1]}${e.time?' · '+esc(e.time):''}</div></div><div class="acts">${e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:''}<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button></div></div>`}
+function evRow(e,d,i){const c=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${c[1]}${e.time?' · '+esc(e.time):''}</div></div><div class="acts">${e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:''}${e.k==='gcal'?'':`<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button>`}</div></div>`}
 function calMonth(){
  const now=new Date(),c=U.cal||(U.cal={y:now.getFullYear(),m:now.getMonth()}),ev=calEvents(),td=todayStr();
  const ym=c.y+'-'+pad2(c.m+1),first=new Date(c.y,c.m,1),lead=(first.getDay()+6)%7,dim=new Date(c.y,c.m+1,0).getDate();
@@ -1506,7 +1507,7 @@ function remindersTab(){
  Object.keys(ev).sort().forEach(d=>ev[d].forEach((e,i)=>{if(e.k!=='wed')list.push({d,i,e})}));
  const w7=addDays(7),w30=addDays(30);
  const G=[['⚠️ Overdue',x=>x.d<td],['This week',x=>x.d>=td&&x.d<=w7],['Next 30 days',x=>x.d>w7&&x.d<=w30],['Later',x=>x.d>w30]];
- const row=x=>{const c=CALK[x.e.k];return `<div class="evr">${x.e.k==='rem'?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${c[1]} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div></div><div class="acts">${x.e.ent?`<button class="btn sm" data-act="open" data-ent="${x.e.ent}" data-id="${x.e.id}">Open</button>`:''}<button class="btn sm" data-act="calGcal" data-d="${x.d}" data-i="${x.i}" aria-label="Add to Google Calendar">📅</button></div></div>`};
+ const row=x=>{const c=CALK[x.e.k];return `<div class="evr">${x.e.k==='rem'?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${c[1]} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div></div><div class="acts">${x.e.ent?`<button class="btn sm" data-act="open" data-ent="${x.e.ent}" data-id="${x.e.id}">Open</button>`:''}${x.e.k==='gcal'?'':`<button class="btn sm" data-act="calGcal" data-d="${x.d}" data-i="${x.i}" aria-label="Add to Google Calendar">📅</button>`}</div></div>`};
  const done=(S.reminders||[]).filter(r=>r.done);
  return `<div class="card"><h3>🔔 How reminders work</h3><p class="small muted">Hanami lists everything that’s coming up here and on your Home page. A web page can’t buzz your phone by itself, so for real alerts send items to your shared Google Calendar (the 📅 button) or download them all as a calendar file; Google then reminds you both.</p><div class="acts"><button class="btn sm primary" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn sm" data-act="calIcsAll">⬇ Everything with a date (.ics)</button></div></div>`+
  G.map(([n,f])=>{const L=list.filter(f);return L.length?`<h2 style="margin:20px 0 6px">${n} <span class="muted small">(${L.length})</span></h2><div class="card" style="padding:6px 16px">${L.map(row).join('')}</div>`:''}).join('')+
@@ -1518,9 +1519,79 @@ function apptTab(){
  return `<div class="card"><h3>📅 Your shared Google Calendar</h3><p class="small muted">Paste your shared calendar’s ID so new events are suggested for that calendar. In Google Calendar open the calendar’s <b>Settings → Integrate calendar → Calendar ID</b> (it looks like <i>abc123@group.calendar.google.com</i>). If it isn’t pre-selected on Google’s page, pick it from the calendar dropdown once.</p><label class="f"><span>Calendar ID</span><input type="text" id="calid" value="${esc(S.settings.calId||'')}" data-chg="calId" placeholder="abc123@group.calendar.google.com" autocomplete="off"></label>${S.appts.length?`<div class="acts"><button class="btn sm" data-act="apptIcsAll">⬇ Download all appointments (.ics)</button></div>`:''}</div>`+
  (up.length?`<h2 style="margin:22px 0 8px">Coming up</h2><div class="grid g2">${up.map(card).join('')}</div>`:emptyBox('No appointments yet','Add venue visits, fittings, tastings and supplier meetings with the date, time and place.',`<button class="btn primary" data-act="open" data-ent="appt">Add an appointment</button>`))+
  (past.length?`<details style="margin-top:22px"><summary><b>Past appointments (${past.length})</b></summary><div class="grid g2" style="margin-top:10px">${past.map(card).join('')}</div></details>`:'')}
+/* ===== v9: Google Calendar feed (read-only) ===== */
+const addD=(ds,n)=>{const d=new Date(ds+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const SYDF=new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+function icsWhen(val){const m=String(val||'').match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/);if(!m)return null;
+ if(m[4]===undefined)return {date:m[1]+'-'+m[2]+'-'+m[3],time:''};
+ if(m[7]){const p=Object.fromEntries(SYDF.formatToParts(new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]))).map(x=>[x.type,x.value]));return {date:p.year+'-'+p.month+'-'+p.day,time:p.hour+':'+p.minute}}
+ return {date:m[1]+'-'+m[2]+'-'+m[3],time:m[4]+':'+m[5]}}
+const icsText2=s=>String(s||'').replace(/\\[nN]/g,'\n').replace(/\\,/g,',').replace(/\;/g,';').replace(/\\\\/g,'\\');
+function icsOccurrences(start,r,to){
+ const out=[],iv=+(r.INTERVAL||1),cnt=r.COUNT?+r.COUNT:1e9,until=r.UNTIL?r.UNTIL.slice(0,4)+'-'+r.UNTIL.slice(4,6)+'-'+r.UNTIL.slice(6,8):'9999-12-31';
+ const DOW=['SU','MO','TU','WE','TH','FR','SA'],S0=new Date(start+'T12:00:00Z');let n=0;
+ const mk=(y,m,d)=>{const x=new Date(Date.UTC(y,m,d,12));return x.toISOString().slice(0,10)};
+ const push=ds=>{if(ds<start||ds>until||ds>to||n>=cnt)return;n++;out.push(ds)};
+ if(r.FREQ==='DAILY'){for(let i=0;i<900;i++){const ds=addD(start,i*iv);if(ds>to||ds>until||n>=cnt)break;push(ds)}}
+ else if(r.FREQ==='WEEKLY'){const days=(r.BYDAY||DOW[S0.getUTCDay()]).split(',').map(x=>(DOW.indexOf(x.slice(-2))+6)%7).sort((a,b)=>a-b),mon=addD(start,-((S0.getUTCDay()+6)%7));
+  for(let w=0;w<450;w++){const wk=addD(mon,w*iv*7);if(wk>to||wk>until||n>=cnt)break;days.forEach(o=>push(addD(wk,o)))}}
+ else if(r.FREQ==='MONTHLY'||r.FREQ==='YEARLY'){const step=r.FREQ==='YEARLY'?12*iv:iv;
+  for(let i=0;i<300;i++){const y=S0.getUTCFullYear(),m=S0.getUTCMonth()+i*step,first=new Date(Date.UTC(y,m,1,12)),ym=first.getUTCFullYear(),mm=first.getUTCMonth(),dim=new Date(Date.UTC(ym,mm+1,0)).getUTCDate();
+   if(mk(ym,mm,1)>to||mk(ym,mm,1)>until||n>=cnt)break;
+   if(r.BYDAY&&r.FREQ==='MONTHLY'){const k=parseInt(r.BYDAY),wd=DOW.indexOf(r.BYDAY.slice(-2));let d;
+    if(k>0)d=1+((wd-first.getUTCDay()+7)%7)+(k-1)*7;else{const last=new Date(Date.UTC(ym,mm,dim,12)).getUTCDay();d=dim-((last-wd+7)%7)+(k+1)*7}
+    if(d>=1&&d<=dim)push(mk(ym,mm,d))}
+   else{const d=S0.getUTCDate();if(d<=dim)push(mk(ym,mm,d))}}}
+ else push(start);
+ return out}
+function parseICS(text,from,to){
+ const lines=String(text).replace(/\r?\n[ \t]/g,'').split(/\r?\n/),evs=[];let cur=null;
+ for(const ln of lines){
+  if(ln==='BEGIN:VEVENT'){cur={ex:[]};continue}
+  if(ln==='END:VEVENT'){if(cur)evs.push(cur);cur=null;continue}
+  if(!cur)continue;const i=ln.indexOf(':');if(i<0)continue;const head=ln.slice(0,i),val=ln.slice(i+1),name=head.split(';')[0].toUpperCase();
+  if(name==='EXDATE')val.split(',').forEach(v=>{const w=icsWhen(v);if(w)cur.ex.push(w.date)});
+  else cur[name]=val}
+ const skip=new Set(),out=[];
+ evs.forEach(e=>{if(e['RECURRENCE-ID']){const w=icsWhen(e['RECURRENCE-ID']);if(w)skip.add(e.UID+'|'+w.date)}});
+ for(const e of evs){
+  if(e.STATUS==='CANCELLED'||!e.DTSTART)continue;
+  const desc=icsText2(e.DESCRIPTION);if(/Added from Hanami/.test(desc))continue;
+  const st=icsWhen(e.DTSTART);if(!st)continue;const en=e.DTEND?icsWhen(e.DTEND):null;
+  let dates=[st.date];
+  if(e.RRULE){const r=Object.fromEntries(e.RRULE.split(';').map(x=>x.split('=')));dates=icsOccurrences(st.date,r,to)}
+  dates=dates.filter(d=>d>=from&&d<=to&&!e.ex.includes(d)&&(e['RECURRENCE-ID']||!skip.has(e.UID+'|'+d)));
+  for(const d of dates){
+   let span=1;if(!st.time&&en&&!e.RRULE){const a=new Date(st.date+'T12:00:00Z'),b=new Date(en.date+'T12:00:00Z');span=Math.min(14,Math.max(1,Math.round((b-a)/864e5)))}
+   for(let k=0;k<span;k++)out.push({id:e.UID+'|'+d+'|'+k,title:icsText2(e.SUMMARY)||'(No title)',date:addD(d,k),time:st.time,end:en&&en.time&&en.date===st.date?en.time:'',place:icsText2(e.LOCATION),notes:desc})}}
+ return out.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))}
+async function gcalLoad(force){
+ if(!S.settings.gfeed||U.gloading)return;
+ if(!force&&U.gevAt&&Date.now()-U.gevAt<600000)return;
+ U.gloading=true;U.gerr='';
+ try{
+  if(typeof supabaseClient==='undefined'||!supabaseClient)throw new Error('Not connected to Supabase');
+  const {data,error}=await supabaseClient.functions.invoke('gcal-feed');
+  if(error)throw error;if(data&&data.error)throw new Error(data.error);
+  U.gev=parseICS(data.ics||'',addDays(-31),addDays(400));
+ }catch(e){const m=(e&&e.message)||String(e);U.gerr=/non-2xx|Failed to send|fetch/i.test(m)?'Hanami couldn’t reach the function. Check it is deployed with the name gcal-feed and that the secret GCAL_ICS_URL is set.':m}
+ U.gloading=false;U.gevAt=Date.now();
+ if(U.page==='appointments')render()}
+function gfeedCard(){
+ const on=!!S.settings.gfeed,n=(U.gev||[]).length;
+ const status=!on?'':U.gloading?'Loading…':U.gerr?`<span style="color:var(--bad,#b3394a)">⚠ ${esc(U.gerr)}</span>`:U.gevAt?`${n} event${n===1?'':'s'} from Google loaded${U.gevAt?' at '+new Date(U.gevAt).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):''}.`:'';
+ return `<div class="card" style="margin-bottom:14px"><h3>⬇ Show my Google events in Hanami</h3><p class="small muted">Read-only: events from your Google Calendar appear on Hanami’s calendar and in Reminders (in blue). Add or change them in Google. Needs the one-off Supabase setup.</p><label class="chk"><input type="checkbox" data-chg="gfeed" ${on?'checked':''}> Show events from my Google Calendar</label>${on?`<div class="small" style="margin-top:8px">${status} <button class="btn sm" data-act="gRefresh" ${U.gloading?'disabled':''}>↻ Refresh</button></div>`:''}</div>`}
+
+function gcalTab(){return gfeedCard()+gcalEmbed()}
+function gcalEmbed(){
+ const id=S.settings.calId;
+ if(!id)return `<div class="card"><h3>🔗 Google Calendar</h3><p class="small muted">Add your shared calendar’s ID on the Appointments tab first, then it will show here.</p><div class="acts"><button class="btn primary" data-act="tab" data-k="appointments" data-v="appts">Go to Appointments</button></div></div>`;
+ const src='https://calendar.google.com/calendar/embed?'+new URLSearchParams({src:id,ctz:'Australia/Sydney',mode:'MONTH',showTitle:'0',showPrint:'0',wkst:'2'}).toString();
+ return `<div class="card"><h3>🔗 Your shared Google Calendar</h3><p class="small muted">This is Google’s own view of your calendar, so it shows everything in it, including events added in Google. It only appears if you’re signed in to a Google account that can see the calendar. If it’s blank or asks you to sign in (common on iPad Safari), use the button to open it in Google instead.</p><div class="acts" style="margin-bottom:10px"><a class="btn primary" href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener">Open Google Calendar ↗</a></div><iframe src="${esc(src)}" style="width:100%;height:620px;border:0;border-radius:12px;background:#fff" title="Google Calendar"></iframe></div>`}
 function pageAppointments(){
  const tab=U.tab.appointments||'month';
- return hdr('Calendar','Appointments, payments, tasks and reminders.',`<button class="btn" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn primary" data-act="open" data-ent="appt">+ Appointment</button>`)+tabs('appointments',[['month','🗓️ Calendar'],['remind','🔔 Reminders'],['appts','📅 Appointments']],tab)+(tab==='month'?calMonth():tab==='remind'?remindersTab():apptTab());
+ if(S.settings.gfeed&&!U.gloading&&(!U.gevAt||Date.now()-U.gevAt>600000))setTimeout(()=>gcalLoad(),0);
+ return hdr('Calendar','Appointments, payments, tasks and reminders.',`<button class="btn" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn primary" data-act="open" data-ent="appt">+ Appointment</button>`)+tabs('appointments',[['month','🗓️ Calendar'],['remind','🔔 Reminders'],['appts','📅 Appointments'],['gcal','🔗 Google Calendar']],tab)+(tab==='gcal'?gcalTab():tab==='month'?calMonth():tab==='remind'?remindersTab():apptTab());
 }
 
 /* ---- DIY & decor ---- */
@@ -2184,7 +2255,7 @@ Object.assign(A,{
  calDay:el=>{U.calSel=el.dataset.d;render()},
  calAdd:el=>openForm(el.dataset.ent,null,{date:el.dataset.d}),
  calGcal:async el=>{const e=((calEvents()[el.dataset.d]||[])[+el.dataset.i]);if(!e)return;window.open(apptGcalURL(e.ex),'_blank','noopener');if(e.k==='appt'){e.ex.cal=true;await commit('appts');render()}},
- calIcsAll:()=>{const ev=calEvents(),list=[];Object.keys(ev).sort().forEach(d=>ev[d].forEach(e=>list.push({...e.ex,id:e.k==='appt'?e.ex.id:e.ex.id+'-'+d})));dl('hanami-all-dates.ics','text/calendar',icsText(list))},
+ calIcsAll:()=>{const ev=calEvents(),list=[];Object.keys(ev).sort().forEach(d=>ev[d].filter(e=>e.k!=='gcal').forEach(e=>list.push({...e.ex,id:e.k==='appt'?e.ex.id:e.ex.id+'-'+d})));dl('hanami-all-dates.ics','text/calendar',icsText(list))},
  vflag:el=>{U.vflag=el.dataset.v;render()},
  vTog:async el=>{const v=S.venues.find(x=>x.id===el.dataset.id);if(!v)return;v[el.dataset.k]=!v[el.dataset.k];await commit('venues');render()},
  vMove:async el=>{const L=venuesView(),i=L.findIndex(x=>x.id===el.dataset.id),j=i+(+el.dataset.n);if(i<0||j<0||j>=L.length)return;
@@ -2212,6 +2283,7 @@ Object.assign(A,{
  supCatDel:async el=>{S.settings.supcats=(S.settings.supcats||[]).filter(x=>x!==el.dataset.n);await commit('settings');render();supCatsModal()},
  diyCsv:()=>dl('hanami-diy-list.csv','text/csv',csv([['Name','Type','For','Status','Store','Qty','Price each','Total','Link','Needed by'],...S.diy.map(d=>[d.title,d.kind,d.area,d.status,d.store,d.qty||1,toD(d.price),toD(diyTotal(d)),d.url,d.need])]))
 });
+A.gRefresh=()=>gcalLoad(true);
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='vnnew'){e.preventDefault();A.vnAdd({dataset:{id:U.hubV}})}if(e.key==='Enter'&&e.target&&e.target.id==='newsupcat'){e.preventDefault();A.supCatAdd()}});
 
 /* ============ events ============ */
@@ -2253,6 +2325,7 @@ document.addEventListener('change',async e=>{
   case 'ginv':{const g=S.guests.find(x=>x.id===el.dataset.id);g.invite=v;await commit('guests');break}
   case 'diyStatus':{const d=S.diy.find(x=>x.id===el.dataset.id);d.status=v;await commit('diy');break}
   case 'remDone':{const r=S.reminders.find(x=>x.id===el.dataset.id);r.done=el.checked;await commit('reminders');break}
+  case 'gfeed':{S.settings.gfeed=el.checked;await commit('settings');if(el.checked){U.gevAt=0;gcalLoad(true)}else{U.gev=[]}break}
   case 'calId':{S.settings.calId=(v||'').trim();await commit('settings');toast('Calendar saved');return}
   case 'barSlot':{const cur=barTabs().map(x=>x[0]);const a=[0,1,2,3,4].map(i=>cur[i]||'');a[+el.dataset.i]=v;S.settings.tabs=a.filter(Boolean);await commit('settings');render();custBar();return}
   case 'wShow':{const h=S.ui.hidden;const i=h.indexOf(el.dataset.k);if(el.checked&&i>=0)h.splice(i,1);if(!el.checked&&i<0)h.push(el.dataset.k);await commit('ui');break}
