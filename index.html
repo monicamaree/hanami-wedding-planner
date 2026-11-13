@@ -456,6 +456,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
 .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
 .evr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line,#ddd)}
 .evr:last-child{border-bottom:0}
+.cal.mini .cd{min-height:42px;padding:4px}.cal.mini .cd .n{font-size:.78rem}
 @media(max-width:700px){.cd{min-height:48px;padding:4px}.cd .ct{display:none}.cd .n{font-size:.78rem}}
 </style>
 </head>
@@ -469,7 +470,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
   <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
-  <p class="small muted" id="ver" style="margin-top:10px">Version: v10 Google events sync, 13 Nov 2026</p>
+  <p class="small muted" id="ver" style="margin-top:10px">Version: v13 home calendar, 13 Nov 2026</p>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
 </div>
@@ -935,7 +936,7 @@ async function enterPlanner(){
 const CATNAMES=['Venue hire','Catering','Alcohol and beverages','Ceremony','Photography','Videography','Florals','Styling and decor','Furniture and equipment hire','Lighting and production','Entertainment and music','Wedding attire','Hair and makeup','Rings and jewellery','Stationery and invitations','Cake and desserts','Celebrant','Transport','Accommodation','Guest favours','Gifts','Wedding planner','Legal and administrative','Insurance','Post-wedding expenses','Miscellaneous','Contingency'];
 const SPLIT={'Venue hire':20,'Catering':20,'Alcohol and beverages':6,'Ceremony':2,'Photography':8,'Videography':4,'Florals':6,'Styling and decor':5,'Furniture and equipment hire':3,'Lighting and production':2,'Entertainment and music':5,'Wedding attire':5,'Hair and makeup':2,'Rings and jewellery':2,'Stationery and invitations':1,'Cake and desserts':1,'Celebrant':1,'Transport':1,'Guest favours':1,'Contingency':5};
 const DEF={
- settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
+ settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,gcat:{},vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
  cats:CATNAMES.map((n,i)=>({id:'c'+i,name:n,alloc:0,color:COLORS[i%COLORS.length],arch:false})),
  expenses:[],tasks:[],appts:[],reminders:[],diy:[],venues:[],suppliers:[],guests:[],items:[],palettes:[],links:[],tables:[],runsheet:[],notes:[],decisions:[],
  boards:['Overall wedding vision','Ceremony','Reception','Flowers','Tablescapes','Wedding attire','Stationery','Lighting'].map((n,i)=>({id:'b'+i,name:n})),
@@ -1340,7 +1341,18 @@ async function runFramework(){
  <h3 style="margin-top:12px">To set real deadlines, I need</h3><p class="small">Your wedding date or date range, your confirmed budget range, whether the guest count is fixed, the exact Blacktown ceremony location, your preferred reception venue, and whether anyone else is contributing.</p>
  <div class="mf"><span></span><button class="btn primary" data-act="close">Go to dashboard</button></div>`,1);
 }
+function homeCal(){
+ const now=new Date(),c=U.cal||(U.cal={y:now.getFullYear(),m:now.getMonth()}),ev=calEvents(),td=todayStr();
+ const ym=c.y+'-'+pad2(c.m+1),first=new Date(c.y,c.m,1),lead=(first.getDay()+6)%7,dim=new Date(c.y,c.m+1,0).getDate();
+ let cells='';for(let i=0;i<lead;i++)cells+='<span class="cd off"></span>';
+ for(let d=1;d<=dim;d++){const ds=ym+'-'+pad2(d),L=ev[ds]||[];cells+=`<button class="cd${ds===td?' td':''}" data-act="homeDay" data-d="${ds}" aria-label="${d} ${first.toLocaleDateString('en-AU',{month:'long'})}, ${L.length} item${L.length===1?'':'s'}"><span class="n">${d}</span><span class="dots">${L.slice(0,4).map(e=>`<i style="background:${CALK[e.k][0]}"></i>`).join('')}</span></button>`}
+ const lbl=d=>d===td?'Today':d===addDays(1)?'Tomorrow':new Date(d+'T12:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+ const up=[];Object.keys(ev).sort().filter(d=>d>=td).forEach(d=>ev[d].forEach(e=>up.push({d,e})));
+ const list=up.slice(0,7);
+ return `<div class="grid g2 homecal" style="margin:16px 0"><div class="card"><div class="row" style="margin-bottom:8px"><button class="btn sm" data-act="calNav" data-n="-1" aria-label="Previous month">‹</button><h3 style="margin:0;flex:1;text-align:center">${first.toLocaleDateString('en-AU',{month:'long',year:'numeric'})}</h3><button class="btn sm" data-act="calNav" data-n="1" aria-label="Next month">›</button></div><div class="cal mini">${['M','T','W','T','F','S','S'].map(x=>`<span class="dow">${x}</span>`).join('')}${cells}</div></div>
+ <div class="card"><div class="row"><h3 style="margin:0">Coming up</h3><button class="btn sm" data-act="homeDay" data-d="${td}">Open calendar →</button></div>${list.length?list.map(({d,e})=>{const k=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${k[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${lbl(d)}${e.time?' · '+esc(e.time):''} · ${k[1]}</div></div></div>`}).join(''):'<p class="muted small" style="margin-top:10px">Nothing coming up. Add an appointment or reminder in the calendar.</p>'}</div></div>`}
 function pageDashboard(){
+ if(S.settings.gfeed&&!U.gloading&&(!U.gevAt||Date.now()-U.gevAt>600000))setTimeout(()=>gcalLoad(),0);
  const s=S.settings;let cd='';
  if(s.date){const n=Math.ceil((new Date(s.date+'T00:00')-new Date(today()+'T00:00'))/864e5);cd=n>0?`<b>${n} day${n===1?'':'s'} to go</b> · ${fdate(s.date)}`:n===0?'<b>Today is the day.</b>':`${fdate(s.date)} has passed`}
  else cd='Date not confirmed yet';
@@ -1352,6 +1364,7 @@ function pageDashboard(){
  const branch='';
  const wins=[['arch_win1','Venue inspiration','A place to celebrate','♡'],['arch_win2','Ceremony & florals','The setting for your vows','✦'],['arch_win3','The little details','All the things you love','❀']].map(([k,t,c,ic],i)=>`<button type="button" class="dream-window dw${i+1}" data-act="go" data-p="studio" aria-label="${t}"><span class="dream-photo${s[k]?' custom':''}" style="background-image:url('${esc(s[k]||WINS[i])}')"></span><span class="dream-window-copy"><i>${ic}</i><b>${t}</b><small>${c}</small></span></button>`).join('');
  return `<section class="hero heroref"><div class="hero-copy"><h1>${esc(s.title)}</h1><p class="tagline">Compare. Plan. Celebrate.</p><div class="meta">${s.names?`Welcome back, ${esc(s.names)}. `:'Welcome. '}${cd}<br><span class="muted">${esc(status)}</span></div><div class="acts"><button class="btn primary" data-act="quickadd">+ Quick add</button><button class="btn" data-act="custDash">Customise dashboard</button><button class="btn" data-act="petals">Scatter petals</button></div></div><div class="dream-windows">${wins}</div></section>
+ ${homeCal()}
  ${hasEx?`<div class="alert info"><span>Example data is loaded so you can see how things work. It is clearly marked “Example”.</span><button class="btn sm" data-act="rmExample">Remove example data</button></div>`:''}
  ${!S.expenses.length&&!hasEx?`<div class="alert info"><span>Starting empty. Want to see Hanami with sample records first?</span><button class="btn sm" data-act="loadExample">Load example data</button></div>`:''}
  ${needBackup()?`<div class="alert warn"><span>💾</span><span style="flex:1">${S.settings.lastBackup?'It’s been over a week since your last backup file.':'You haven’t saved a backup file yet.'} Save a copy so you can’t lose your plans.</span><button class="btn sm" data-act="saveModal">Save a copy</button></div>`:''}
@@ -1483,11 +1496,11 @@ function calEvents(){
  allPayments().filter(p=>!p.paid&&p.due).forEach(p=>{const t=(p.label||'Payment')+' · '+p.exp.name+' ('+fmt(p.amt)+')';add(p.due,{k:'pay',t,ent:'expense',id:p.exp.id,ex:{id:'pay'+(p.id||p.exp.id),title:'Payment due: '+t,date:p.due}})});
  S.tasks.filter(t=>isOpen(t)&&t.due).forEach(t=>add(t.due,{k:'task',t:t.title,ent:'task',id:t.id,ex:{id:'task'+t.id,title:'Task due: '+t.title,date:t.due}}));
  (S.reminders||[]).filter(r=>!r.done&&r.date).forEach(r=>add(r.date,{k:'rem',t:r.title,time:r.time,ent:'reminder',id:r.id,ex:{id:r.id,title:r.title,date:r.date,start:r.time,notes:r.notes}}));
- (U.gev||[]).forEach(g=>add(g.date,{k:'gcal',t:g.title,time:g.time,ent:'',ex:{id:'g'+g.id,title:g.title,date:g.date}}));
+ (U.gev||[]).forEach(g=>add(g.date,{k:gKind(g),g:1,uid:g.uid,t:g.title,time:g.time,ent:'',ex:{id:'g'+g.id,title:g.title,date:g.date}}));
  if(S.settings.date)add(S.settings.date,{k:'wed',t:'Our wedding day 💍',ent:'',ex:{id:'wedding',title:'Our wedding day',date:S.settings.date}});
  Object.values(m).forEach(a=>a.sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')));
  return m}
-function evRow(e,d,i){const c=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${c[1]}${e.time?' · '+esc(e.time):''}</div></div><div class="acts">${e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:''}${e.k==='gcal'?'':`<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button>`}</div></div>`}
+function evRow(e,d,i){const c=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${c[1]}${e.g?' · from Google':''}${e.time?' · '+esc(e.time):''}</div>${e.g?gcatSel(e):''}</div><div class="acts">${e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:''}${e.g?'':`<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button>`}</div></div>`}
 function calMonth(){
  const now=new Date(),c=U.cal||(U.cal={y:now.getFullYear(),m:now.getMonth()}),ev=calEvents(),td=todayStr();
  const ym=c.y+'-'+pad2(c.m+1),first=new Date(c.y,c.m,1),lead=(first.getDay()+6)%7,dim=new Date(c.y,c.m+1,0).getDate();
@@ -1507,7 +1520,7 @@ function remindersTab(){
  Object.keys(ev).sort().forEach(d=>ev[d].forEach((e,i)=>{if(e.k!=='wed')list.push({d,i,e})}));
  const w7=addDays(7),w30=addDays(30);
  const G=[['⚠️ Overdue',x=>x.d<td],['This week',x=>x.d>=td&&x.d<=w7],['Next 30 days',x=>x.d>w7&&x.d<=w30],['Later',x=>x.d>w30]];
- const row=x=>{const c=CALK[x.e.k];return `<div class="evr">${x.e.k==='rem'?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${c[1]} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div></div><div class="acts">${x.e.ent?`<button class="btn sm" data-act="open" data-ent="${x.e.ent}" data-id="${x.e.id}">Open</button>`:''}${x.e.k==='gcal'?'':`<button class="btn sm" data-act="calGcal" data-d="${x.d}" data-i="${x.i}" aria-label="Add to Google Calendar">📅</button>`}</div></div>`};
+ const row=x=>{const c=CALK[x.e.k];return `<div class="evr">${x.e.k==='rem'&&!x.e.g?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${c[1]}${x.e.g?' · from Google':''} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div>${x.e.g?gcatSel(x.e):''}</div><div class="acts">${x.e.ent?`<button class="btn sm" data-act="open" data-ent="${x.e.ent}" data-id="${x.e.id}">Open</button>`:''}${x.e.g?'':`<button class="btn sm" data-act="calGcal" data-d="${x.d}" data-i="${x.i}" aria-label="Add to Google Calendar">📅</button>`}</div></div>`};
  const done=(S.reminders||[]).filter(r=>r.done);
  return `<div class="card"><h3>🔔 How reminders work</h3><p class="small muted">Hanami lists everything that’s coming up here and on your Home page. A web page can’t buzz your phone by itself, so for real alerts send items to your shared Google Calendar (the 📅 button) or download them all as a calendar file; Google then reminds you both.</p><div class="acts"><button class="btn sm primary" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn sm" data-act="calIcsAll">⬇ Everything with a date (.ics)</button></div></div>`+
  G.map(([n,f])=>{const L=list.filter(f);return L.length?`<h2 style="margin:20px 0 6px">${n} <span class="muted small">(${L.length})</span></h2><div class="card" style="padding:6px 16px">${L.map(row).join('')}</div>`:''}).join('')+
@@ -1563,7 +1576,7 @@ function parseICS(text,from,to){
   dates=dates.filter(d=>d>=from&&d<=to&&!e.ex.includes(d)&&(e['RECURRENCE-ID']||!skip.has(e.UID+'|'+d)));
   for(const d of dates){
    let span=1;if(!st.time&&en&&!e.RRULE){const a=new Date(st.date+'T12:00:00Z'),b=new Date(en.date+'T12:00:00Z');span=Math.min(14,Math.max(1,Math.round((b-a)/864e5)))}
-   for(let k=0;k<span;k++)out.push({id:e.UID+'|'+d+'|'+k,title:icsText2(e.SUMMARY)||'(No title)',date:addD(d,k),time:st.time,end:en&&en.time&&en.date===st.date?en.time:'',place:icsText2(e.LOCATION),notes:desc})}}
+   for(let k=0;k<span;k++)out.push({uid:e.UID,id:e.UID+'|'+d+'|'+k,title:icsText2(e.SUMMARY)||'(No title)',date:addD(d,k),time:st.time,end:en&&en.time&&en.date===st.date?en.time:'',place:icsText2(e.LOCATION),notes:desc})}}
  return out.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))}
 async function gcalLoad(force){
  if(!S.settings.gfeed||U.gloading)return;
@@ -1574,9 +1587,21 @@ async function gcalLoad(force){
   const {data,error}=await supabaseClient.functions.invoke('gcal-feed');
   if(error)throw error;if(data&&data.error)throw new Error(data.error);
   U.gev=parseICS(data.ics||'',addDays(-31),addDays(400));
- }catch(e){const m=(e&&e.message)||String(e);U.gerr=/non-2xx|Failed to send|fetch/i.test(m)?'Hanami couldn’t reach the function. Check it is deployed with the name gcal-feed and that the secret GCAL_ICS_URL is set.':m}
+ }catch(e){let m=(e&&e.message)||String(e);
+  if(e&&e.context&&typeof e.context.status==='number'){const c=e.context.status;let b='';try{const j=await e.context.json();b=j.error||j.message||''}catch(x){}
+   m=c===404?'Supabase can’t find a function called gcal-feed (error 404). Check its name is exactly gcal-feed.':c===401?'Supabase refused the request (error 401). Sign out and back in, then try again.':c===500&&/GCAL_ICS_URL/.test(b)?'The secret GCAL_ICS_URL isn’t set in Supabase (Edge Functions → Secrets).':'The function answered with error '+c+(b?': '+b:'')+'.'}
+  else if(/Failed to send|fetch/i.test(m))m='Couldn’t reach Supabase from this browser. Check your connection and the function name gcal-feed.';
+  U.gerr=m}
  U.gloading=false;U.gevAt=Date.now();
- if(U.page==='appointments')render()}
+ if(U.page==='appointments'||U.page==='dashboard')render()}
+const GCATS=[['','Auto'],['appt','Appointment'],['pay','Payment'],['task','Task'],['rem','Reminder'],['gcal','Other']];
+function gKind(g){const o=(S.settings.gcat||{})[g.uid];if(o)return o;const t=(g.title||'').toLowerCase();
+ if(/\b(payment|deposit|invoice|instalment|installment|balance due|pay\b)/.test(t))return 'pay';
+ if(/\b(fitting|visit|viewing|tasting|trial|meeting|appointment|consult|inspection|rehearsal|walkthrough|dentist|doctor)/.test(t))return 'appt';
+ if(/\b(reminder|remember|call|email|follow up|follow-up|book\b|order\b)/.test(t))return 'rem';
+ if(/\b(task|to do|todo|buy|pick up|collect|finish|submit)/.test(t))return 'task';
+ return 'gcal'}
+const gcatSel=e=>{const cur=(S.settings.gcat||{})[e.uid]||'';return `<select data-chg="gcat" data-u="${esc(e.uid)}" aria-label="Category for ${esc(e.t)}" style="margin-top:4px;font-size:.78rem;padding:2px 6px;min-height:28px">${GCATS.map(([k,l])=>`<option value="${k}" ${cur===k?'selected':''}>${k===''?'Category: auto':l}</option>`).join('')}</select>`};
 function gfeedCard(){
  const on=!!S.settings.gfeed,n=(U.gev||[]).length;
  const status=!on?'':U.gloading?'Loading…':U.gerr?`<span style="color:var(--bad,#b3394a)">⚠ ${esc(U.gerr)}</span>`:U.gevAt?`${n} event${n===1?'':'s'} from Google loaded${U.gevAt?' at '+new Date(U.gevAt).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):''}.`:'';
@@ -2255,7 +2280,7 @@ Object.assign(A,{
  calDay:el=>{U.calSel=el.dataset.d;render()},
  calAdd:el=>openForm(el.dataset.ent,null,{date:el.dataset.d}),
  calGcal:async el=>{const e=((calEvents()[el.dataset.d]||[])[+el.dataset.i]);if(!e)return;window.open(apptGcalURL(e.ex),'_blank','noopener');if(e.k==='appt'){e.ex.cal=true;await commit('appts');render()}},
- calIcsAll:()=>{const ev=calEvents(),list=[];Object.keys(ev).sort().forEach(d=>ev[d].filter(e=>e.k!=='gcal').forEach(e=>list.push({...e.ex,id:e.k==='appt'?e.ex.id:e.ex.id+'-'+d})));dl('hanami-all-dates.ics','text/calendar',icsText(list))},
+ calIcsAll:()=>{const ev=calEvents(),list=[];Object.keys(ev).sort().forEach(d=>ev[d].filter(e=>!e.g).forEach(e=>list.push({...e.ex,id:e.k==='appt'?e.ex.id:e.ex.id+'-'+d})));dl('hanami-all-dates.ics','text/calendar',icsText(list))},
  vflag:el=>{U.vflag=el.dataset.v;render()},
  vTog:async el=>{const v=S.venues.find(x=>x.id===el.dataset.id);if(!v)return;v[el.dataset.k]=!v[el.dataset.k];await commit('venues');render()},
  vMove:async el=>{const L=venuesView(),i=L.findIndex(x=>x.id===el.dataset.id),j=i+(+el.dataset.n);if(i<0||j<0||j>=L.length)return;
@@ -2284,6 +2309,7 @@ Object.assign(A,{
  diyCsv:()=>dl('hanami-diy-list.csv','text/csv',csv([['Name','Type','For','Status','Store','Qty','Price each','Total','Link','Needed by'],...S.diy.map(d=>[d.title,d.kind,d.area,d.status,d.store,d.qty||1,toD(d.price),toD(diyTotal(d)),d.url,d.need])]))
 });
 A.gRefresh=()=>gcalLoad(true);
+A.homeDay=el=>{const d=el.dataset.d;U.tab.appointments='month';U.cal={y:+d.slice(0,4),m:+d.slice(5,7)-1};U.calSel=d;go('appointments')};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='vnnew'){e.preventDefault();A.vnAdd({dataset:{id:U.hubV}})}if(e.key==='Enter'&&e.target&&e.target.id==='newsupcat'){e.preventDefault();A.supCatAdd()}});
 
 /* ============ events ============ */
@@ -2326,6 +2352,7 @@ document.addEventListener('change',async e=>{
   case 'diyStatus':{const d=S.diy.find(x=>x.id===el.dataset.id);d.status=v;await commit('diy');break}
   case 'remDone':{const r=S.reminders.find(x=>x.id===el.dataset.id);r.done=el.checked;await commit('reminders');break}
   case 'gfeed':{S.settings.gfeed=el.checked;await commit('settings');if(el.checked){U.gevAt=0;gcalLoad(true)}else{U.gev=[]}break}
+  case 'gcat':{S.settings.gcat=S.settings.gcat||{};if(v)S.settings.gcat[el.dataset.u]=v;else delete S.settings.gcat[el.dataset.u];await commit('settings');break}
   case 'calId':{S.settings.calId=(v||'').trim();await commit('settings');toast('Calendar saved');return}
   case 'barSlot':{const cur=barTabs().map(x=>x[0]);const a=[0,1,2,3,4].map(i=>cur[i]||'');a[+el.dataset.i]=v;S.settings.tabs=a.filter(Boolean);await commit('settings');render();custBar();return}
   case 'wShow':{const h=S.ui.hidden;const i=h.indexOf(el.dataset.k);if(el.checked&&i>=0)h.splice(i,1);if(!el.checked&&i<0)h.push(el.dataset.k);await commit('ui');break}
