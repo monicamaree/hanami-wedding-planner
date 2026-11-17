@@ -470,7 +470,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
   <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
-  <p class="small muted" id="ver" style="margin-top:10px">Version: v13 home calendar, 13 Nov 2026</p>
+  <p class="small muted" id="ver" style="margin-top:10px">Version: v15 two-way sync, 13 Nov 2026</p>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
 </div>
@@ -873,7 +873,7 @@ const store={mode:'cloud',
  async set(k,v){if(!supabaseClient||!planId||!currentUser)return false;try{const key=k.replace(/^hanami:/,'');const isPrivate=key==='vault-categories'||key.startsWith('vault:');const table=isPrivate?'private_vault_data':'wedding_data';const row=isPrivate?{plan_id:planId,user_id:currentUser.id,key,value:v,updated_at:new Date().toISOString()}:{plan_id:planId,key,value:v,updated_by:currentUser.id,updated_at:new Date().toISOString()};const conflict=isPrivate?'plan_id,user_id,key':'plan_id,key';const {error}=await supabaseClient.from(table).upsert(row,{onConflict:conflict});if(error)throw error;return true}catch(e){console.error('Hanami cloud save failed',k,e);return false}}
 };
 function setStatus(s){const el=$('#savestat');if(!el)return;el.textContent={saving:'Saving to the cloud…',saved:'✓ All changes saved to Supabase',failed:'⚠ Cloud save failed — keep this page open and retry.'}[s]||''}
-async function commit(...ks){setStatus('saving');let ok=true;for(const k of ks){if(!await store.set('hanami:'+k,S[k]))ok=false}setStatus(ok?'saved':'failed');return ok}
+async function commit(...ks){setStatus('saving');let ok=true;for(const k of ks){if(!await store.set('hanami:'+k,S[k]))ok=false}setStatus(ok?'saved':'failed');if(ks.some(k=>k==='appts'||k==='reminders'||k==='expenses')&&typeof gSyncSoon==='function')gSyncSoon();return ok}
 async function ensurePlan(){
  // If this account was invited, securely claim the invitation before looking for a plan.
  const {error:claimError}=await supabaseClient.rpc('hanami_accept_invite');
@@ -936,7 +936,7 @@ async function enterPlanner(){
 const CATNAMES=['Venue hire','Catering','Alcohol and beverages','Ceremony','Photography','Videography','Florals','Styling and decor','Furniture and equipment hire','Lighting and production','Entertainment and music','Wedding attire','Hair and makeup','Rings and jewellery','Stationery and invitations','Cake and desserts','Celebrant','Transport','Accommodation','Guest favours','Gifts','Wedding planner','Legal and administrative','Insurance','Post-wedding expenses','Miscellaneous','Contingency'];
 const SPLIT={'Venue hire':20,'Catering':20,'Alcohol and beverages':6,'Ceremony':2,'Photography':8,'Videography':4,'Florals':6,'Styling and decor':5,'Furniture and equipment hire':3,'Lighting and production':2,'Entertainment and music':5,'Wedding attire':5,'Hair and makeup':2,'Rings and jewellery':2,'Stationery and invitations':1,'Cake and desserts':1,'Celebrant':1,'Transport':1,'Guest favours':1,'Contingency':5};
 const DEF={
- settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,gcat:{},vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
+ settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,gcat:{},ecats:[],gpush:false,gurl:'',gtoken:'',gmap:{},vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
  cats:CATNAMES.map((n,i)=>({id:'c'+i,name:n,alloc:0,color:COLORS[i%COLORS.length],arch:false})),
  expenses:[],tasks:[],appts:[],reminders:[],diy:[],venues:[],suppliers:[],guests:[],items:[],palettes:[],links:[],tables:[],runsheet:[],notes:[],decisions:[],
  boards:['Overall wedding vision','Ceremony','Reception','Flowers','Tablescapes','Wedding attire','Stationery','Lighting'].map((n,i)=>({id:'b'+i,name:n})),
@@ -953,7 +953,7 @@ async function load(){
  S.cats.forEach(c=>{const i=OLDC.indexOf(c.color);if(i>=0)c.color=COLORS[i]});
 }
 function setStatus(s){const el=$('#savestat');if(!el)return;el.textContent={saving:'Saving…',saved:store.mode==='local'?'Saved in this browser only':'All changes saved',failed:'Not saved — storage is unavailable here, so changes last only until you close this page.'}[s]||''}
-async function commit(...ks){setStatus('saving');let ok=true;for(const k of ks){if(!await store.set('hanami:'+k,S[k]))ok=false}setStatus(ok?'saved':'failed');return ok}
+async function commit(...ks){setStatus('saving');let ok=true;for(const k of ks){if(!await store.set('hanami:'+k,S[k]))ok=false}setStatus(ok?'saved':'failed');if(ks.some(k=>k==='appts'||k==='reminders'||k==='expenses')&&typeof gSyncSoon==='function')gSyncSoon();return ok}
 
 /* ============ calculations (integer cents) ============ */
 const live=e=>e.status!=='Cancelled';
@@ -1084,6 +1084,7 @@ function fieldHTML(f,v){
  else if(f.t==='tags')i=`<input id="${id}" value="${esc((v||[]).join(', '))}">`;
  else if(f.t==='number')i=`<input id="${id}" type="number" min="0" value="${v??''}">`;
  else if(f.t==='image')i=`<input type="hidden" id="${id}" value="${esc(v||'')}"><input type="file" accept="image/*" data-chg="imgField" data-k="${f.k}"><div id="prev_${f.k}" style="margin-top:6px">${v?`<img src="${esc(v)}" alt="" style="max-height:90px;border-radius:6px">`:''}</div>`;
+ else if(f.t==='alert')i=`<input id="${id}" type="datetime-local" value="${esc(v||'')}"><div class="vchips" style="margin-top:6px">${[['h1','1 hour before'],['d0','Morning of (8am)'],['d1','Day before (9am)'],['d2','2 days before (9am)'],['x','Clear']].map(([m,l])=>`<button type="button" class="vt" data-act="alPreset" data-k="${f.k}" data-m="${m}">${l}</button>`).join('')}</div>`;
  else i=`<input id="${id}" type="${f.t}" value="${esc(v??'')}">`;
  return `<label class="f${w}${f.cls?' '+f.cls:''}"><span>${esc(f.l)}</span>${i}</label>`;
 }
@@ -1119,6 +1120,7 @@ async function saveForm(){
   if(f.t==='url'&&v&&!/^https?:\/\//i.test(v))errs.push(f.l+' must start with http:// or https://');
   out[f.k]=v}
  if(ent==='settings'&&out.max&&out.min&&out.max<out.min)errs.push('Maximum budget must be at least the minimum');
+ validateAlerts(ent,out,errs);
  if(ent==='task'&&id&&wouldCycle(id,out.deps||[]))errs.push('Those dependencies would create a loop');
  if(errs.length){$('#ferr').textContent=errs.join('. ')+'.';return}
  if(ent==='supplier'){const nc=(out.newcat||'').trim();if(nc){const ex=supCats().find(x=>x.toLowerCase()===nc.toLowerCase());if(ex)out.category=ex;else{S.settings.supcats=[...(S.settings.supcats||[]),nc];out.category=nc;await commit('settings')}}delete out.newcat}
@@ -1126,7 +1128,7 @@ async function saveForm(){
  if(ent==='payment'){
   const e=S.expenses.find(x=>x.id===out.exp);e.payments=e.payments||[];
   if(e.payments.some(p=>p.amt===out.amt&&p.due===out.due&&(p.label||'')===out.label)){$('#ferr').textContent='A payment with the same label, amount and date already exists on this expense.';btn.disabled=false;return}
-  e.payments.push({id:uid(),label:out.label,amt:out.amt,due:out.due,paid:out.paid});ok=await commit('expenses');msg='Payment added'}
+  e.payments.push({id:uid(),label:out.label,amt:out.amt,due:out.due,paid:out.paid,al1:out.al1||'',al2:out.al2||''});ok=await commit('expenses');msg='Payment added'}
  else if(ent==='settings'){Object.assign(S.settings,out,{onboarded:true});ok=await commit('settings')}
  else{
   if(ent==='guest'&&!id){const nm=(out.first+' '+out.last).trim().toLowerCase();if(S.guests.some(g=>(g.first+' '+(g.last||'')).trim().toLowerCase()===nm)&&!FORM.dupOk){FORM.dupOk=1;$('#ferr').textContent='A guest with this name already exists. Select Add guest again if this is a different person.';btn.disabled=false;return}}
@@ -1345,14 +1347,15 @@ function homeCal(){
  const now=new Date(),c=U.cal||(U.cal={y:now.getFullYear(),m:now.getMonth()}),ev=calEvents(),td=todayStr();
  const ym=c.y+'-'+pad2(c.m+1),first=new Date(c.y,c.m,1),lead=(first.getDay()+6)%7,dim=new Date(c.y,c.m+1,0).getDate();
  let cells='';for(let i=0;i<lead;i++)cells+='<span class="cd off"></span>';
- for(let d=1;d<=dim;d++){const ds=ym+'-'+pad2(d),L=ev[ds]||[];cells+=`<button class="cd${ds===td?' td':''}" data-act="homeDay" data-d="${ds}" aria-label="${d} ${first.toLocaleDateString('en-AU',{month:'long'})}, ${L.length} item${L.length===1?'':'s'}"><span class="n">${d}</span><span class="dots">${L.slice(0,4).map(e=>`<i style="background:${CALK[e.k][0]}"></i>`).join('')}</span></button>`}
+ for(let d=1;d<=dim;d++){const ds=ym+'-'+pad2(d),L=ev[ds]||[];cells+=`<button class="cd${ds===td?' td':''}" data-act="homeDay" data-d="${ds}" aria-label="${d} ${first.toLocaleDateString('en-AU',{month:'long'})}, ${L.length} item${L.length===1?'':'s'}"><span class="n">${d}</span><span class="dots">${L.slice(0,4).map(e=>`<i style="background:${ecI(e)[0]}"></i>`).join('')}</span></button>`}
  const lbl=d=>d===td?'Today':d===addDays(1)?'Tomorrow':new Date(d+'T12:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
  const up=[];Object.keys(ev).sort().filter(d=>d>=td).forEach(d=>ev[d].forEach(e=>up.push({d,e})));
  const list=up.slice(0,7);
  return `<div class="grid g2 homecal" style="margin:16px 0"><div class="card"><div class="row" style="margin-bottom:8px"><button class="btn sm" data-act="calNav" data-n="-1" aria-label="Previous month">‹</button><h3 style="margin:0;flex:1;text-align:center">${first.toLocaleDateString('en-AU',{month:'long',year:'numeric'})}</h3><button class="btn sm" data-act="calNav" data-n="1" aria-label="Next month">›</button></div><div class="cal mini">${['M','T','W','T','F','S','S'].map(x=>`<span class="dow">${x}</span>`).join('')}${cells}</div></div>
- <div class="card"><div class="row"><h3 style="margin:0">Coming up</h3><button class="btn sm" data-act="homeDay" data-d="${td}">Open calendar →</button></div>${list.length?list.map(({d,e})=>{const k=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${k[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${lbl(d)}${e.time?' · '+esc(e.time):''} · ${k[1]}</div></div></div>`}).join(''):'<p class="muted small" style="margin-top:10px">Nothing coming up. Add an appointment or reminder in the calendar.</p>'}</div></div>`}
+ <div class="card"><div class="row"><h3 style="margin:0">Coming up</h3><button class="btn sm" data-act="homeDay" data-d="${td}">Open calendar →</button></div>${list.length?list.map(({d,e})=>{const k=ecI(e);return `<div class="evr"><span class="cdot" style="background:${k[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${lbl(d)}${e.time?' · '+esc(e.time):''} · ${k[1]}</div></div></div>`}).join(''):'<p class="muted small" style="margin-top:10px">Nothing coming up. Add an appointment or reminder in the calendar.</p>'}</div></div>`}
 function pageDashboard(){
  if(S.settings.gfeed&&!U.gloading&&(!U.gevAt||Date.now()-U.gevAt>600000))setTimeout(()=>gcalLoad(),0);
+ if(S.settings.gpush&&!U.gpOnce){U.gpOnce=1;gSyncSoon()}
  const s=S.settings;let cd='';
  if(s.date){const n=Math.ceil((new Date(s.date+'T00:00')-new Date(today()+'T00:00'))/864e5);cd=n>0?`<b>${n} day${n===1?'':'s'} to go</b> · ${fdate(s.date)}`:n===0?'<b>Today is the day.</b>':`${fdate(s.date)} has passed`}
  else cd='Date not confirmed yet';
@@ -1485,22 +1488,12 @@ function apptGcalURL(a){const d=apptDates(a),p=new URLSearchParams({action:'TEMP
 function icsText(list){const e2=t=>String(t||'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
  const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Hanami//Wedding planner//EN','CALSCALE:GREGORIAN'];
- for(const a of list){const d=apptDates(a);out.push('BEGIN:VEVENT','UID:'+a.id+'@hanami','DTSTAMP:'+stamp,d.allDay?'DTSTART;VALUE=DATE:'+d.s:'DTSTART;TZID=Australia/Sydney:'+d.s,d.allDay?'DTEND;VALUE=DATE:'+d.e:'DTEND;TZID=Australia/Sydney:'+d.e,'SUMMARY:'+e2(a.title),'LOCATION:'+e2(a.place),'DESCRIPTION:'+e2(apptDetails(a)),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e2(a.title),'TRIGGER:-P1D','END:VALARM','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e2(a.title),'TRIGGER:-PT1H','END:VALARM','END:VEVENT')}
+ for(const a of list){const d=apptDates(a);out.push('BEGIN:VEVENT','UID:'+a.id+'@hanami','DTSTAMP:'+stamp,d.allDay?'DTSTART;VALUE=DATE:'+d.s:'DTSTART;TZID=Australia/Sydney:'+d.s,d.allDay?'DTEND;VALUE=DATE:'+d.e:'DTEND;TZID=Australia/Sydney:'+d.e,'SUMMARY:'+e2(a.title),'LOCATION:'+e2(a.place),'DESCRIPTION:'+e2(apptDetails(a)),...icsAlarms(a,e2),'END:VEVENT')}
  out.push('END:VCALENDAR');return out.join('\r\n')}
 const apptWhen=a=>{const d=new Date(a.date+'T12:00:00');const day=isNaN(d)?a.date:d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});return day+(a.start?' · '+a.start+(a.end?'–'+a.end:''):' · all day')};
 
 const CALK={appt:['#7fa6b8','Appointment'],pay:['#c9a56a','Payment due'],task:['#8fa88c','Task due'],rem:['#c9808f','Reminder'],wed:['#a898c8','Wedding day'],gcal:['#6b8fd1','Google Calendar']};
-function calEvents(){
- const m={},add=(d,e)=>{if(!d)return;(m[d]=m[d]||[]).push(e)};
- (S.appts||[]).forEach(a=>a.date&&add(a.date,{k:'appt',t:a.title,time:a.start,ent:'appt',id:a.id,ex:a}));
- allPayments().filter(p=>!p.paid&&p.due).forEach(p=>{const t=(p.label||'Payment')+' · '+p.exp.name+' ('+fmt(p.amt)+')';add(p.due,{k:'pay',t,ent:'expense',id:p.exp.id,ex:{id:'pay'+(p.id||p.exp.id),title:'Payment due: '+t,date:p.due}})});
- S.tasks.filter(t=>isOpen(t)&&t.due).forEach(t=>add(t.due,{k:'task',t:t.title,ent:'task',id:t.id,ex:{id:'task'+t.id,title:'Task due: '+t.title,date:t.due}}));
- (S.reminders||[]).filter(r=>!r.done&&r.date).forEach(r=>add(r.date,{k:'rem',t:r.title,time:r.time,ent:'reminder',id:r.id,ex:{id:r.id,title:r.title,date:r.date,start:r.time,notes:r.notes}}));
- (U.gev||[]).forEach(g=>add(g.date,{k:gKind(g),g:1,uid:g.uid,t:g.title,time:g.time,ent:'',ex:{id:'g'+g.id,title:g.title,date:g.date}}));
- if(S.settings.date)add(S.settings.date,{k:'wed',t:'Our wedding day 💍',ent:'',ex:{id:'wedding',title:'Our wedding day',date:S.settings.date}});
- Object.values(m).forEach(a=>a.sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')));
- return m}
-function evRow(e,d,i){const c=CALK[e.k];return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${c[1]}${e.g?' · from Google':''}${e.time?' · '+esc(e.time):''}</div>${e.g?gcatSel(e):''}</div><div class="acts">${e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:''}${e.g?'':`<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button>`}</div></div>`}
+function evRow(e,d,i){const c=ecI(e);return `<div class="evr"><span class="cdot" style="background:${c[0]}"></span><div style="flex:1;min-width:0"><b>${esc(e.t)}</b><div class="small muted">${evSub(e)}</div>${e.g?gcatSel(e):''}</div><div class="acts">${evBtns(e,d,i)}</div></div>`}
 function calMonth(){
  const now=new Date(),c=U.cal||(U.cal={y:now.getFullYear(),m:now.getMonth()}),ev=calEvents(),td=todayStr();
  const ym=c.y+'-'+pad2(c.m+1),first=new Date(c.y,c.m,1),lead=(first.getDay()+6)%7,dim=new Date(c.y,c.m+1,0).getDate();
@@ -1508,11 +1501,11 @@ function calMonth(){
  let cells='';
  for(let i=0;i<lead;i++)cells+='<span class="cd off"></span>';
  for(let d=1;d<=dim;d++){const ds=ym+'-'+pad2(d),L=ev[ds]||[];
-  cells+=`<button class="cd${ds===td?' td':''}${ds===sel?' sel':''}" data-act="calDay" data-d="${ds}" aria-label="${d} ${first.toLocaleDateString('en-AU',{month:'long'})}, ${L.length} item${L.length===1?'':'s'}"><span class="n">${d}</span><span class="dots">${L.slice(0,5).map(e=>`<i style="background:${CALK[e.k][0]}"></i>`).join('')}</span>${L.slice(0,2).map(e=>`<span class="ct">${esc(e.t)}</span>`).join('')}</button>`}
+  cells+=`<button class="cd${ds===td?' td':''}${ds===sel?' sel':''}" data-act="calDay" data-d="${ds}" aria-label="${d} ${first.toLocaleDateString('en-AU',{month:'long'})}, ${L.length} item${L.length===1?'':'s'}"><span class="n">${d}</span><span class="dots">${L.slice(0,5).map(e=>`<i style="background:${ecI(e)[0]}"></i>`).join('')}</span>${L.slice(0,2).map(e=>`<span class="ct">${esc(e.t)}</span>`).join('')}</button>`}
  const L=ev[sel]||[];
  return `<div class="card"><div class="row" style="margin-bottom:10px"><button class="btn sm" data-act="calNav" data-n="-1" aria-label="Previous month">‹</button><h2 style="margin:0;text-align:center;flex:1">${first.toLocaleDateString('en-AU',{month:'long',year:'numeric'})}</h2><button class="btn sm" data-act="calNav" data-n="1" aria-label="Next month">›</button></div>
  <div class="cal">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<span class="dow">${x}</span>`).join('')}${cells}</div>
- <div class="small muted" style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">${Object.values(CALK).map(k=>`<span><span class="cdot" style="background:${k[0]}"></span> ${k[1]}</span>`).join('')}<button class="btn sm" data-act="calToday" style="margin-left:auto">Today</button></div></div>
+ <div class="small muted" style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">${calLegend(ev,ym)}<button class="btn sm" data-act="calToday" style="margin-left:auto">Today</button></div></div>
  <div class="card" style="margin-top:14px"><div class="row" style="flex-wrap:wrap"><h3 style="margin:0">${fdate(sel)}</h3><div class="acts"><button class="btn sm" data-act="calAdd" data-ent="reminder" data-d="${sel}">+ Reminder</button><button class="btn sm" data-act="calAdd" data-ent="appt" data-d="${sel}">+ Appointment</button></div></div>${L.length?L.map((e,i)=>evRow(e,sel,i)).join(''):'<p class="muted small">Nothing on this day.</p>'}</div>
  <p class="small muted">Shows appointments, unpaid payments with a due date, open tasks with a due date, your reminders and the wedding day. Tap 📅 on any item to put it in your shared Google Calendar.</p>`}
 function remindersTab(){
@@ -1520,7 +1513,7 @@ function remindersTab(){
  Object.keys(ev).sort().forEach(d=>ev[d].forEach((e,i)=>{if(e.k!=='wed')list.push({d,i,e})}));
  const w7=addDays(7),w30=addDays(30);
  const G=[['⚠️ Overdue',x=>x.d<td],['This week',x=>x.d>=td&&x.d<=w7],['Next 30 days',x=>x.d>w7&&x.d<=w30],['Later',x=>x.d>w30]];
- const row=x=>{const c=CALK[x.e.k];return `<div class="evr">${x.e.k==='rem'&&!x.e.g?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${c[1]}${x.e.g?' · from Google':''} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div>${x.e.g?gcatSel(x.e):''}</div><div class="acts">${x.e.ent?`<button class="btn sm" data-act="open" data-ent="${x.e.ent}" data-id="${x.e.id}">Open</button>`:''}${x.e.g?'':`<button class="btn sm" data-act="calGcal" data-d="${x.d}" data-i="${x.i}" aria-label="Add to Google Calendar">📅</button>`}</div></div>`};
+ const row=x=>{const c=ecI(x.e);return `<div class="evr">${x.e.k==='rem'&&!x.e.g?`<input type="checkbox" data-chg="remDone" data-id="${x.e.id}" aria-label="Mark done">`:`<span class="cdot" style="background:${c[0]}"></span>`}<div style="flex:1;min-width:0"><b>${esc(x.e.t)}</b><div class="small muted">${evSub({...x.e,time:''})} · ${fdate(x.d)}${x.e.time?' at '+esc(x.e.time):''}</div>${x.e.g?gcatSel(x.e):''}</div><div class="acts">${evBtns(x.e,x.d,x.i)}</div></div>`};
  const done=(S.reminders||[]).filter(r=>r.done);
  return `<div class="card"><h3>🔔 How reminders work</h3><p class="small muted">Hanami lists everything that’s coming up here and on your Home page. A web page can’t buzz your phone by itself, so for real alerts send items to your shared Google Calendar (the 📅 button) or download them all as a calendar file; Google then reminds you both.</p><div class="acts"><button class="btn sm primary" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn sm" data-act="calIcsAll">⬇ Everything with a date (.ics)</button></div></div>`+
  G.map(([n,f])=>{const L=list.filter(f);return L.length?`<h2 style="margin:20px 0 6px">${n} <span class="muted small">(${L.length})</span></h2><div class="card" style="padding:6px 16px">${L.map(row).join('')}</div>`:''}).join('')+
@@ -1528,7 +1521,7 @@ function remindersTab(){
  (done.length?`<details style="margin-top:20px"><summary><b>Done reminders (${done.length})</b></summary><div class="card" style="padding:6px 16px;margin-top:8px">${done.map(r=>`<div class="evr"><input type="checkbox" data-chg="remDone" data-id="${r.id}" checked aria-label="Mark not done"><div style="flex:1"><s>${esc(r.title)}</s><div class="small muted">${fdate(r.date)}</div></div><button class="btn sm danger" data-act="delRec" data-ent="reminder" data-id="${r.id}">Delete</button></div>`).join('')}</div></details>`:'')}
 function apptTab(){
  const t=todayStr(),all=S.appts.slice().sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))),up=all.filter(a=>a.date>=t),past=all.filter(a=>a.date<t).reverse();
- const card=a=>{const sup=a.supplier?(S.suppliers.find(x=>x.id===a.supplier)||{}).name:'';return `<div class="card appt"><div class="row"><h3>${esc(a.title)}</h3>${a.kind?chip(a.kind,'info'):''}</div><div class="small"><b>${esc(apptWhen(a))}</b></div>${a.place?`<div class="small muted">📍 ${esc(a.place)}</div>`:''}${sup?`<div class="small muted">🤝 ${esc(sup)}</div>`:''}${a.notes?`<p class="small">${esc(a.notes)}</p>`:''}<div class="acts" style="margin-top:10px"><button class="btn sm ${a.cal?'':'primary'}" data-act="apptGcal" data-id="${a.id}">${a.cal?'📅 Open in Google Calendar again':'📅 Add to Google Calendar'}</button><button class="btn sm" data-act="apptIcs" data-id="${a.id}">⬇ Calendar file</button><button class="btn sm" data-act="open" data-ent="appt" data-id="${a.id}">Edit</button>${a.cal?`<button class="btn sm" data-act="apptUnmark" data-id="${a.id}">Not added after all</button>`:''}</div>${a.cal?`<div class="small" style="margin-top:6px">${chip('Sent to calendar','ok')} <span class="muted">If you change the date or time here, update the calendar copy too.</span></div>`:''}</div>`};
+ const card=a=>{const sup=a.supplier?(S.suppliers.find(x=>x.id===a.supplier)||{}).name:'';return `<div class="card appt"><div class="row"><h3>${esc(a.title)}</h3>${a.kind?chip(a.kind,'info'):''}</div><div class="small"><b>${esc(apptWhen(a))}</b></div>${a.place?`<div class="small muted">📍 ${esc(a.place)}</div>`:''}${(a.al1||a.al2)?`<div class="small muted">🔔 ${[a.al1,a.al2].filter(Boolean).map(x=>esc(x.replace('T',' '))).join(' · ')}</div>`:''}${sup?`<div class="small muted">🤝 ${esc(sup)}</div>`:''}${a.notes?`<p class="small">${esc(a.notes)}</p>`:''}<div class="acts" style="margin-top:10px">${S.settings.gpush&&!(a.cal&&!(S.settings.gmap||{})['a:'+a.id])?(((S.settings.gmap||{})['a:'+a.id])?chip('✓ In Google Calendar','ok'):chip('Will send to Google','info')):`<button class="btn sm ${a.cal?'':'primary'}" data-act="apptGcal" data-id="${a.id}">${a.cal?'📅 Open in Google Calendar again':'📅 Add to Google Calendar'}</button>`}<button class="btn sm" data-act="apptIcs" data-id="${a.id}">⬇ Calendar file</button><button class="btn sm" data-act="open" data-ent="appt" data-id="${a.id}">Edit</button>${a.cal?`<button class="btn sm" data-act="apptUnmark" data-id="${a.id}">Not added after all</button>`:''}</div>${a.cal?`<div class="small" style="margin-top:6px">${chip('Sent to calendar','ok')} <span class="muted">If you change the date or time here, update the calendar copy too.</span></div>`:''}</div>`};
  return `<div class="card"><h3>📅 Your shared Google Calendar</h3><p class="small muted">Paste your shared calendar’s ID so new events are suggested for that calendar. In Google Calendar open the calendar’s <b>Settings → Integrate calendar → Calendar ID</b> (it looks like <i>abc123@group.calendar.google.com</i>). If it isn’t pre-selected on Google’s page, pick it from the calendar dropdown once.</p><label class="f"><span>Calendar ID</span><input type="text" id="calid" value="${esc(S.settings.calId||'')}" data-chg="calId" placeholder="abc123@group.calendar.google.com" autocomplete="off"></label>${S.appts.length?`<div class="acts"><button class="btn sm" data-act="apptIcsAll">⬇ Download all appointments (.ics)</button></div>`:''}</div>`+
  (up.length?`<h2 style="margin:22px 0 8px">Coming up</h2><div class="grid g2">${up.map(card).join('')}</div>`:emptyBox('No appointments yet','Add venue visits, fittings, tastings and supplier meetings with the date, time and place.',`<button class="btn primary" data-act="open" data-ent="appt">Add an appointment</button>`))+
  (past.length?`<details style="margin-top:22px"><summary><b>Past appointments (${past.length})</b></summary><div class="grid g2" style="margin-top:10px">${past.map(card).join('')}</div></details>`:'')}
@@ -1557,7 +1550,7 @@ function icsOccurrences(start,r,to){
    else{const d=S0.getUTCDate();if(d<=dim)push(mk(ym,mm,d))}}}
  else push(start);
  return out}
-function parseICS(text,from,to){
+function parseICS(text,from,to,mir){
  const lines=String(text).replace(/\r?\n[ \t]/g,'').split(/\r?\n/),evs=[];let cur=null;
  for(const ln of lines){
   if(ln==='BEGIN:VEVENT'){cur={ex:[]};continue}
@@ -1569,7 +1562,8 @@ function parseICS(text,from,to){
  evs.forEach(e=>{if(e['RECURRENCE-ID']){const w=icsWhen(e['RECURRENCE-ID']);if(w)skip.add(e.UID+'|'+w.date)}});
  for(const e of evs){
   if(e.STATUS==='CANCELLED'||!e.DTSTART)continue;
-  const desc=icsText2(e.DESCRIPTION);if(/Added from Hanami/.test(desc))continue;
+  const desc=icsText2(e.DESCRIPTION);
+  if(/Added from Hanami/.test(desc)){const hm=desc.match(/Hanami-ID: (\S+)/),s0=icsWhen(e.DTSTART);if(hm&&mir&&s0&&!e.RRULE){const e0=e.DTEND?icsWhen(e.DTEND):null;mir[hm[1]]={title:icsText2(e.SUMMARY),date:s0.date,time:s0.time,end:e0&&e0.time&&e0.date===s0.date?e0.time:'',place:icsText2(e.LOCATION)}}continue}
   const st=icsWhen(e.DTSTART);if(!st)continue;const en=e.DTEND?icsWhen(e.DTEND):null;
   let dates=[st.date];
   if(e.RRULE){const r=Object.fromEntries(e.RRULE.split(';').map(x=>x.split('=')));dates=icsOccurrences(st.date,r,to)}
@@ -1586,7 +1580,8 @@ async function gcalLoad(force){
   if(typeof supabaseClient==='undefined'||!supabaseClient)throw new Error('Not connected to Supabase');
   const {data,error}=await supabaseClient.functions.invoke('gcal-feed');
   if(error)throw error;if(data&&data.error)throw new Error(data.error);
-  U.gev=parseICS(data.ics||'',addDays(-31),addDays(400));
+  const mir={};U.gev=parseICS(data.ics||'',addDays(-31),addDays(400),mir);
+  if(S.settings.gpush&&/BEGIN:VCALENDAR/.test(data.ics||'')&&/END:VCALENDAR/.test(data.ics||''))await gPull(mir);
  }catch(e){let m=(e&&e.message)||String(e);
   if(e&&e.context&&typeof e.context.status==='number'){const c=e.context.status;let b='';try{const j=await e.context.json();b=j.error||j.message||''}catch(x){}
    m=c===404?'Supabase can’t find a function called gcal-feed (error 404). Check its name is exactly gcal-feed.':c===401?'Supabase refused the request (error 401). Sign out and back in, then try again.':c===500&&/GCAL_ICS_URL/.test(b)?'The secret GCAL_ICS_URL isn’t set in Supabase (Edge Functions → Secrets).':'The function answered with error '+c+(b?': '+b:'')+'.'}
@@ -1594,20 +1589,143 @@ async function gcalLoad(force){
   U.gerr=m}
  U.gloading=false;U.gevAt=Date.now();
  if(U.page==='appointments'||U.page==='dashboard')render()}
-const GCATS=[['','Auto'],['appt','Appointment'],['pay','Payment'],['task','Task'],['rem','Reminder'],['gcal','Other']];
-function gKind(g){const o=(S.settings.gcat||{})[g.uid];if(o)return o;const t=(g.title||'').toLowerCase();
- if(/\b(payment|deposit|invoice|instalment|installment|balance due|pay\b)/.test(t))return 'pay';
- if(/\b(fitting|visit|viewing|tasting|trial|meeting|appointment|consult|inspection|rehearsal|walkthrough|dentist|doctor)/.test(t))return 'appt';
- if(/\b(reminder|remember|call|email|follow up|follow-up|book\b|order\b)/.test(t))return 'rem';
- if(/\b(task|to do|todo|buy|pick up|collect|finish|submit)/.test(t))return 'task';
- return 'gcal'}
-const gcatSel=e=>{const cur=(S.settings.gcat||{})[e.uid]||'';return `<select data-chg="gcat" data-u="${esc(e.uid)}" aria-label="Category for ${esc(e.t)}" style="margin-top:4px;font-size:.78rem;padding:2px 6px;min-height:28px">${GCATS.map(([k,l])=>`<option value="${k}" ${cur===k?'selected':''}>${k===''?'Category: auto':l}</option>`).join('')}</select>`};
 function gfeedCard(){
  const on=!!S.settings.gfeed,n=(U.gev||[]).length;
  const status=!on?'':U.gloading?'Loading…':U.gerr?`<span style="color:var(--bad,#b3394a)">⚠ ${esc(U.gerr)}</span>`:U.gevAt?`${n} event${n===1?'':'s'} from Google loaded${U.gevAt?' at '+new Date(U.gevAt).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):''}.`:'';
  return `<div class="card" style="margin-bottom:14px"><h3>⬇ Show my Google events in Hanami</h3><p class="small muted">Read-only: events from your Google Calendar appear on Hanami’s calendar and in Reminders (in blue). Add or change them in Google. Needs the one-off Supabase setup.</p><label class="chk"><input type="checkbox" data-chg="gfeed" ${on?'checked':''}> Show events from my Google Calendar</label>${on?`<div class="small" style="margin-top:8px">${status} <button class="btn sm" data-act="gRefresh" ${U.gloading?'disabled':''}>↻ Refresh</button></div>`:''}</div>`}
 
-function gcalTab(){return gfeedCard()+gcalEmbed()}
+/* ===== v14: shared categories, notifications, push to Google ===== */
+const ECAT_BASE=['Appointment','Payment','Task','Reminder','Venue visit','Supplier meeting','Dress fitting','Suit fitting','Tasting','Trial','Meeting','Other'];
+const ECAT_COL={'Appointment':'#7fa6b8','Payment':'#c9a56a','Task':'#8fa88c','Reminder':'#c9808f','Venue visit':'#6fae8f','Supplier meeting':'#5f9ea8','Dress fitting':'#b79ad6','Suit fitting':'#6f7fb8','Tasting':'#e0946b','Trial':'#d98aa6','Meeting':'#8e9bb0','Other':'#9aa0b8','Wedding day':'#a898c8','Event':'#6b8fd1'};
+const ECAT_EXTRA=['#c97f5d','#7e9f5a','#b06d9a','#5d8fc9','#a58c4f','#4f9a94'];
+const ecatList=()=>[...ECAT_BASE.filter(x=>x!=='Other'),...((S.settings&&S.settings.ecats)||[]),'Other'];
+const catColor=n=>ECAT_COL[n]||ECAT_EXTRA[Math.max(0,((S.settings.ecats)||[]).indexOf(n))%ECAT_EXTRA.length];
+const ecI=e=>[catColor(e.cat||'Event'),e.cat||'Event'];
+const normCat=v=>({appt:'Appointment',pay:'Payment',task:'Task',rem:'Reminder',gcal:'Other'}[v]||v);
+function gCat(g){const o=(S.settings.gcat||{})[g.uid];if(o)return normCat(o);const t=(g.title||'').toLowerCase();
+ if(/\b(payment|deposit|invoice|instalment|installment|balance due|pay)\b/.test(t))return 'Payment';
+ if(/\b(dress|gown|bridal)\b.*\b(fitting|appointment)|\bfitting\b.*\b(dress|gown)/.test(t))return 'Dress fitting';
+ if(/\b(suit|tux|tuxedo)\b/.test(t))return 'Suit fitting';
+ if(/\btasting\b/.test(t))return 'Tasting';
+ if(/\btrial\b/.test(t))return 'Trial';
+ if(/\b(venue|viewing|inspection|walkthrough|walk-through|site visit)\b/.test(t))return 'Venue visit';
+ if(/\b(florist|photographer|caterer|celebrant|supplier|dj|band|stylist)\b/.test(t)&&/\b(meeting|meet|call|consult)/.test(t))return 'Supplier meeting';
+ if(/\b(meeting|consult|appointment|fitting|dentist|doctor)/.test(t))return 'Appointment';
+ if(/\b(reminder|remember|call|email|follow up|follow-up|book|order)\b/.test(t))return 'Reminder';
+ if(/\b(task|to do|todo|buy|pick up|collect|finish|submit)\b/.test(t))return 'Task';
+ return 'Event'}
+const gcatSel=e=>{const cur=normCat((S.settings.gcat||{})[e.uid]||'');return `<select data-chg="gcat" data-u="${esc(e.uid)}" aria-label="Category for ${esc(e.t)}" style="margin-top:4px;font-size:.78rem;padding:2px 6px;min-height:28px"><option value="">Category: auto</option>${ecatList().map(l=>`<option ${cur===l?'selected':''}>${esc(l)}</option>`).join('')}</select>`};
+/* entity edits */
+{const k=ENT.appt.fields.find(f=>f.k==='kind');k.l='Category';k.o=()=>ecatList().map(x=>[x,x]);
+ ENT.appt.defaults=()=>({date:todayStr(),kind:'Appointment'});
+ const AL=(n)=>({k:'al'+n,l:'🔔 Notification '+n+' (date & time)',t:'alert'});
+ ENT.appt.fields.push(AL(1),AL(2));
+ ENT.reminder.fields.splice(1,0,{k:'cat',l:'Category',t:'select',o:()=>ecatList().map(x=>[x,x])});
+ ENT.reminder.defaults=()=>({date:todayStr(),cat:'Reminder'});
+ ENT.reminder.fields.push(AL(1),AL(2));
+ ENT.payment.fields.push(AL(1),AL(2))}
+/* notifications */
+const fmtLocal=d=>ymdOf(d)+'T'+pad2(d.getHours())+':'+pad2(d.getMinutes());
+function alertMins(d,t,als){const st=new Date(d+'T'+(t||'09:00'));return als.filter(Boolean).map(a=>Math.round((st-new Date(a))/60000)).filter(m=>m>=0&&m<=40320)}
+function icsAlarms(a,e2){let m=alertMins(a.date,a.start||a.time,[a.al1,a.al2]);if(!m.length)m=[1440,60];
+ return m.flatMap(x=>['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e2(a.title),'TRIGGER:-PT'+x+'M','END:VALARM'])}
+function alPresetCalc(m,d,t){const base=new Date(d+'T'+(t||'09:00'));
+ if(m==='h1'){base.setHours(base.getHours()-1);return fmtLocal(base)}
+ const day=new Date(d+'T00:00');
+ if(m==='d0'){day.setHours(8);return fmtLocal(day)}
+ if(m==='d1'){day.setDate(day.getDate()-1);day.setHours(9);return fmtLocal(day)}
+ if(m==='d2'){day.setDate(day.getDate()-2);day.setHours(9);return fmtLocal(day)}
+ return ''}
+function validateAlerts(ent,out,errs){
+ if(!['appt','reminder','payment'].includes(ent))return;
+ const d=out.date||out.due,t=out.start||out.time||'09:00';
+ if(!out.al1&&!out.al2)return;
+ if(!d){errs.push('Set a date before adding notifications');return}
+ const st=new Date(d+'T'+t);
+ for(const k of ['al1','al2']){if(!out[k])continue;const m=(st-new Date(out[k]))/60000;
+  if(isNaN(m))errs.push('Check the notification time');else if(m<0)errs.push('A notification has to be before the event');else if(m>40320)errs.push('Google can only notify up to 4 weeks before')}}
+/* events */
+function payList(){const o=[];S.expenses.filter(live).forEach(e=>(e.payments||[]).forEach((p,i)=>o.push({p,e,i,key:'p:'+e.id+':'+(p.id||i)})));return o}
+function calEvents(){
+ const m={},add=(d,e)=>{if(!d)return;(m[d]=m[d]||[]).push(e)};
+ (S.appts||[]).forEach(a=>a.date&&add(a.date,{k:'appt',cat:a.kind||'Appointment',t:a.title,time:a.start,ent:'appt',id:a.id,ex:a,al:[a.al1,a.al2].filter(Boolean)}));
+ payList().filter(x=>!x.p.paid&&x.p.due).forEach(({p,e,i})=>{const t=(p.label||'Payment')+' · '+e.name+' ('+fmt(p.amt)+')';add(p.due,{k:'pay',cat:'Payment',t,ent:'expense',id:e.id,pi:i,al:[p.al1,p.al2].filter(Boolean),ex:{id:'pay'+(p.id||e.id+i),title:'Payment due: '+t,date:p.due,al1:p.al1,al2:p.al2}})});
+ S.tasks.filter(t=>isOpen(t)&&t.due).forEach(t=>add(t.due,{k:'task',cat:'Task',t:t.title,ent:'task',id:t.id,ex:{id:'task'+t.id,title:'Task due: '+t.title,date:t.due}}));
+ (S.reminders||[]).filter(r=>!r.done&&r.date).forEach(r=>add(r.date,{k:'rem',cat:r.cat||'Reminder',t:r.title,time:r.time,ent:'reminder',id:r.id,al:[r.al1,r.al2].filter(Boolean),ex:{id:r.id,title:r.title,date:r.date,start:r.time,notes:r.notes,al1:r.al1,al2:r.al2}}));
+ (U.gev||[]).forEach(g=>add(g.date,{k:'gcal',g:1,cat:gCat(g),uid:g.uid,t:g.title,time:g.time,ent:'',ex:{id:'g'+g.id,title:g.title,date:g.date}}));
+ if(S.settings.date)add(S.settings.date,{k:'wed',cat:'Wedding day',t:'Our wedding day 💍',ent:'',ex:{id:'wedding',title:'Our wedding day',date:S.settings.date}});
+ Object.values(m).forEach(a=>a.sort((x,y)=>(x.time||'99').localeCompare(y.time||'99')));
+ return m}
+function evBtns(e,d,i){return (e.ent?`<button class="btn sm" data-act="open" data-ent="${e.ent}" data-id="${e.id}">Open</button>`:'')+(e.k==='pay'?`<button class="btn sm" data-act="payAl" data-e="${e.id}" data-p="${e.pi}" aria-label="Set notifications" title="Set notifications">🔔</button>`:'')+(e.g||S.settings.gpush?'':`<button class="btn sm" data-act="calGcal" data-d="${d}" data-i="${i}" title="Add to Google Calendar" aria-label="Add to Google Calendar">📅</button>`)}
+function evSub(e){const c=ecI(e);return esc(c[1])+(e.g?' · from Google':'')+(e.time?' · '+esc(e.time):'')+(e.al&&e.al.length?' · 🔔 '+e.al.length:'')}
+function calLegend(ev,ym){const seen=[];Object.keys(ev).filter(d=>d.startsWith(ym)).forEach(d=>ev[d].forEach(e=>{if(!seen.includes(e.cat))seen.push(e.cat)}));return (seen.length?seen:['Appointment','Payment','Task','Reminder']).map(n=>`<span><span class="cdot" style="background:${catColor(n)}"></span> ${esc(n)}</span>`).join('')}
+function payAlModal(eid,pi){const e=S.expenses.find(x=>x.id===eid),p=e&&(e.payments||[])[+pi];if(!p)return;U.payAl={eid,pi};
+ modal(`<div class="mh"><h2>🔔 Payment notifications</h2><button class="btn sm" data-act="close">Close</button></div><p class="small muted"><b>${esc((p.label||'Payment')+' · '+e.name)}</b> due ${fdate(p.due)}. Notifications are sent through Google Calendar, so turn on “Send to Google Calendar” first.</p><input type="hidden" id="f_due" value="${esc(p.due||'')}"><label class="f"><span>Notification 1</span><input id="f_al1" type="datetime-local" value="${esc(p.al1||'')}"><div class="vchips" style="margin-top:6px">${[['h1','1 hour before'],['d0','Morning of (8am)'],['d1','Day before (9am)'],['d2','2 days before (9am)'],['x','Clear']].map(([m,l])=>`<button type="button" class="vt" data-act="alPreset" data-k="al1" data-m="${m}">${l}</button>`).join('')}</div></label><label class="f"><span>Notification 2</span><input id="f_al2" type="datetime-local" value="${esc(p.al2||'')}"><div class="vchips" style="margin-top:6px">${[['h1','1 hour before'],['d0','Morning of (8am)'],['d1','Day before (9am)'],['d2','2 days before (9am)'],['x','Clear']].map(([m,l])=>`<button type="button" class="vt" data-act="alPreset" data-k="al2" data-m="${m}">${l}</button>`).join('')}</div></label><div class="err" id="ferr" role="alert"></div><div class="mf"><span></span><div class="acts"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="payAlSave">Save</button></div></div>`)}
+function ecatModal(){const c=(S.settings.ecats||[]);
+ modal(`<div class="mh"><h2>Calendar categories</h2><button class="btn sm primary" data-act="close">Done</button></div><p class="small muted">Built in: ${ECAT_BASE.join(', ')}. Add your own below. They’re available for appointments, reminders and Google events.</p>${c.length?c.map(n=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><span><span class="cdot" style="background:${catColor(n)}"></span> ${esc(n)}</span><button class="btn sm danger" data-act="ecatDel" data-n="${esc(n)}">Remove</button></div>`).join(''):'<p class="muted small">No custom categories yet.</p>'}<div class="row" style="gap:6px;margin-top:12px"><input id="newecat" placeholder="New category, e.g. Hair trial" style="flex:1" aria-label="New category"><button class="btn primary" data-act="ecatAdd">Add</button></div>`)}
+/* push to Google */
+function gDesired(){
+ const out={},foot='Added from Hanami',s=S.settings,map=s.gmap||{};
+ const mk=(key,title,d,t,e,place,notes,als,ping0)=>{
+  let mins=alertMins(d,t||'09:00',als);if(ping0)mins=[0,...mins.filter(x=>x!==0)];
+  const timed=!!t||mins.length>0,st=t||'09:00';let en='';
+  if(timed){const x=new Date(d+'T'+st);if(e&&t&&e>t)en=e;else{x.setMinutes(x.getMinutes()+(t?60:30));en=ymdOf(x)===d?pad2(x.getHours())+':'+pad2(x.getMinutes()):'23:59'}}
+  out[key]={key,title,date:d,allDay:!timed,start:timed?d+'T'+st+':00':'',end:timed?d+'T'+en+':00':'',place:place||'',notes:(notes?notes+'\n':'')+foot+'\nHanami-ID: '+key,mins:[...new Set(mins)].sort((a,b)=>b-a)}};
+ (S.appts||[]).forEach(a=>{if(!a.date)return;if(a.cal&&!map['a:'+a.id])return;mk('a:'+a.id,a.title,a.date,a.start,a.end,a.place,[a.kind?'Category: '+a.kind:'',a.notes||''].filter(Boolean).join('\n'),[a.al1,a.al2])});
+ (S.reminders||[]).forEach(r=>{if(r.done||!r.date)return;mk('r:'+r.id,r.title,r.date,r.time||'09:00','','',[r.cat&&r.cat!=='Reminder'?'Category: '+r.cat:'Reminder',r.notes||''].filter(Boolean).join('\n'),[r.al1,r.al2],true)});
+ payList().forEach(({p,e,key})=>{if(p.paid||!p.due||!(p.al1||p.al2))return;mk(key,'Payment due: '+(p.label||'Payment')+' · '+e.name+' ('+fmt(p.amt)+')',p.due,'','','','Category: Payment',[p.al1,p.al2])});
+ return out}
+let _gt;function gSyncSoon(){const s=S.settings;if(!s||!s.gpush)return;clearTimeout(_gt);_gt=setTimeout(()=>gSync(),1500)}
+async function gSync(){
+ const s=S.settings;if(!s.gpush||!s.gurl||!s.calId)return;
+ if(U.gpushing){U.gagain=true;return}
+ U.gpushing=true;U.gpstat='Sending to Google Calendar…';let err='';
+ try{
+  const want=gDesired(),map=s.gmap=s.gmap||{},ops=[];
+  for(const k in want){const w=want[k];w.h=gHash(w);if(!map[k]||map[k].h!==w.h)ops.push({op:'upsert',gid:(map[k]&&map[k].gid)||'',...w})}
+  for(const k in map)if(!want[k])ops.push({op:'delete',key:k,gid:map[k].gid});
+  if(!ops.length)U.gpstat='Google Calendar is up to date.';
+  else{let done=0;
+   for(let i=0;i<ops.length;i+=10){const chunk=ops.slice(i,i+10);
+    const r=await fetch(s.gurl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:s.gtoken||'',calId:s.calId,ops:chunk})});
+    const j=await r.json();if(j.error)throw new Error(j.error);
+    for(const x of (j.results||[])){if(!x.ok)throw new Error(x.error||'Google refused an event');const op=chunk.find(o=>o.key===x.key);if(op&&op.op==='delete')delete map[x.key];else if(op){const old=map[x.key]||{},v=fpOp(want[x.key]);map[x.key]={gid:x.gid,h:want[x.key].h,v,hist:[...(old.hist||[]).slice(-4),v],seen:old.gid===x.gid?(old.seen||0):0}}done++}}
+   U.gpstat='Sent '+done+' change'+(done===1?'':'s')+' to Google at '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+'.'}
+ }catch(e){err=(e&&e.message)||String(e);U.gpstat='⚠ '+(/Failed to fetch|NetworkError|Load failed/i.test(err)?'Couldn’t reach Google. Check the Web app URL and that access is set to “Anyone”.':err);toast('Google Calendar sync problem. See the Google Calendar tab.')}
+ try{await commit('settings')}catch(e){}
+ U.gpushing=false;if(U.gagain){U.gagain=false;gSyncSoon()}
+ if(U.page==='appointments')render()}
+function gpushCard(){const s=S.settings,on=!!s.gpush;
+ return `<div class="card" style="margin-bottom:14px"><h3>⬆ Send my appointments &amp; reminders to Google Calendar</h3><p class="small muted">When this is on, anything you add or change in Hanami (appointments, reminders, and payments that have notifications) is created or updated in your shared Google Calendar automatically, with your notification times as Google notifications. Changes you make to those events in Google (time, title, place, or deleting them) come back into Hanami when it next reads your Google events (turn that on below too). Needs the one-off “Apps Script” setup.</p><label class="chk"><input type="checkbox" data-chg="gpush" ${on?'checked':''}> Send to Google Calendar</label><label class="f"><span>Web app URL (from Apps Script)</span><input type="url" data-chg="gurl" value="${esc(s.gurl||'')}" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"></label><label class="f"><span>Password (the TOKEN you chose in the script)</span><input type="text" data-chg="gtoken" value="${esc(s.gtoken||'')}" autocomplete="off"></label>${on?`<div class="small" style="margin-top:8px">${esc(U.gpstat||(s.gurl&&s.calId?'Ready.':'Add your Calendar ID (Appointments tab) and the Web app URL.'))} <button class="btn sm" data-act="gSyncNow" ${U.gpushing?'disabled':''}>↻ Sync now</button></div>`:''}</div>`}
+
+/* ===== v15: pull changes made in Google back into Hanami ===== */
+const gHash=w=>JSON.stringify([w.title,w.date,w.start,w.end,w.allDay,w.place,w.notes,w.mins]);
+const fpOp=w=>[w.title,w.date,w.allDay?'':w.start.slice(11,16),w.allDay?'':w.end.slice(11,16),w.place||''];
+const fpM=m=>[m.title,m.date,m.time||'',m.time?(m.end||''):'',m.place||''];
+function gApply(key,m){
+ const [t,a,b]=key.split(':');
+ if(t==='a'){const x=S.appts.find(v=>v.id===a);if(!x)return false;x.title=m.title||x.title;x.date=m.date;x.start=m.time||'';x.end=m.time?(m.end||''):'';x.place=m.place||'';return 'appts'}
+ if(t==='r'){const x=S.reminders.find(v=>v.id===a);if(!x)return false;x.title=m.title||x.title;x.date=m.date;x.time=m.time||'';return 'reminders'}
+ if(t==='p'){const e=S.expenses.find(v=>v.id===a),p=e&&(e.payments||[]).find((q,i)=>String(q.id||i)===b);if(!p)return false;p.due=m.date;return 'expenses'}
+ return false}
+async function gPull(mir){
+ const s=S.settings;if(!s.gpush||!s.gmap)return;
+ const map=s.gmap,want=gDesired(),from=addDays(-31),to=addDays(400),touched=new Set(),gone=[];let n=0;
+ for(const key in map){const w=want[key],ent=map[key];if(!w)continue;
+  if(ent.h!==gHash(w))continue;
+  const m=mir[key];
+  if(m){ent.seen=1;const cur=JSON.stringify(fpM(m));
+   if(cur===JSON.stringify(ent.v||[]))continue;
+   if((ent.hist||[]).some(x=>JSON.stringify(x)===cur))continue;
+   const k=gApply(key,m);if(!k)continue;
+   const w2=gDesired()[key];ent.h=w2?gHash(w2):ent.h;ent.v=fpM(m);ent.hist=[...(ent.hist||[]).slice(-4),ent.v];touched.add(k);n++}
+  else if(ent.seen&&w.date>=from&&w.date<=to)gone.push(key)}
+ if(n){touched.add('settings');await commit(...touched);U.gpstat='Updated '+n+' item'+(n===1?'':'s')+' from changes made in Google.';render()}
+ if(gone.length&&Date.now()-(U.gonePrompt||0)>300000){U.gonePrompt=Date.now();goneModal(gone)}}
+function goneModal(keys){U.gone=keys;const want=gDesired();
+ modal(`<div class="mh"><h2>Deleted in Google</h2></div><p class="small muted">These were sent from Hanami but are no longer in your Google Calendar:</p><ul>${keys.map(k=>`<li>${esc((want[k]||{}).title||k)}</li>`).join('')}</ul><p class="small muted">Remove them from Hanami too, or put them back in Google? (For a payment, “remove” just clears its notifications.)</p><div class="mf"><span></span><div class="acts"><button class="btn" data-act="goneNo">Put back in Google</button><button class="btn primary" data-act="goneYes">Remove from Hanami</button></div></div>`)}
+
+function gcalTab(){return gpushCard()+gfeedCard()+gcalEmbed()}
 function gcalEmbed(){
  const id=S.settings.calId;
  if(!id)return `<div class="card"><h3>🔗 Google Calendar</h3><p class="small muted">Add your shared calendar’s ID on the Appointments tab first, then it will show here.</p><div class="acts"><button class="btn primary" data-act="tab" data-k="appointments" data-v="appts">Go to Appointments</button></div></div>`;
@@ -1616,7 +1734,8 @@ function gcalEmbed(){
 function pageAppointments(){
  const tab=U.tab.appointments||'month';
  if(S.settings.gfeed&&!U.gloading&&(!U.gevAt||Date.now()-U.gevAt>600000))setTimeout(()=>gcalLoad(),0);
- return hdr('Calendar','Appointments, payments, tasks and reminders.',`<button class="btn" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn primary" data-act="open" data-ent="appt">+ Appointment</button>`)+tabs('appointments',[['month','🗓️ Calendar'],['remind','🔔 Reminders'],['appts','📅 Appointments'],['gcal','🔗 Google Calendar']],tab)+(tab==='gcal'?gcalTab():tab==='month'?calMonth():tab==='remind'?remindersTab():apptTab());
+ if(S.settings.gpush&&!U.gpOnce){U.gpOnce=1;gSyncSoon()}
+ return hdr('Calendar','Appointments, payments, tasks and reminders.',`<button class="btn" data-act="ecats">＋ Category</button><button class="btn" data-act="open" data-ent="reminder">+ Reminder</button><button class="btn primary" data-act="open" data-ent="appt">+ Appointment</button>`)+tabs('appointments',[['month','🗓️ Calendar'],['remind','🔔 Reminders'],['appts','📅 Appointments'],['gcal','🔗 Google Calendar']],tab)+(tab==='gcal'?gcalTab():tab==='month'?calMonth():tab==='remind'?remindersTab():apptTab());
 }
 
 /* ---- DIY & decor ---- */
@@ -2309,6 +2428,19 @@ Object.assign(A,{
  diyCsv:()=>dl('hanami-diy-list.csv','text/csv',csv([['Name','Type','For','Status','Store','Qty','Price each','Total','Link','Needed by'],...S.diy.map(d=>[d.title,d.kind,d.area,d.status,d.store,d.qty||1,toD(d.price),toD(diyTotal(d)),d.url,d.need])]))
 });
 A.gRefresh=()=>gcalLoad(true);
+A.gSyncNow=()=>gSync();
+A.goneYes=async()=>{const map=S.settings.gmap||{};for(const key of (U.gone||[])){const [t,a,b]=key.split(':');
+  if(t==='a')S.appts=S.appts.filter(x=>x.id!==a);else if(t==='r')S.reminders=S.reminders.filter(x=>x.id!==a);
+  else if(t==='p'){const e=S.expenses.find(v=>v.id===a),p=e&&(e.payments||[]).find((q,i)=>String(q.id||i)===b);if(p){p.al1='';p.al2=''}}
+  delete map[key]}
+ U.gone=[];await commit('appts','reminders','expenses','settings');closeModal();render();toast('Removed from Hanami')};
+A.goneNo=async()=>{const map=S.settings.gmap||{};for(const key of (U.gone||[]))delete map[key];U.gone=[];await commit('settings');closeModal();gSyncSoon();toast('Putting them back in Google…')};
+A.ecats=()=>ecatModal();
+A.ecatAdd=async()=>{const n=($('#newecat')?.value||'').trim();if(!n)return;if(ecatList().some(x=>x.toLowerCase()===n.toLowerCase())){toast('You already have that category');return}S.settings.ecats=[...(S.settings.ecats||[]),n];await commit('settings');render();ecatModal()};
+A.ecatDel=async el=>{S.settings.ecats=(S.settings.ecats||[]).filter(x=>x!==el.dataset.n);await commit('settings');render();ecatModal()};
+A.alPreset=el=>{const k=el.dataset.k,m=el.dataset.m,inp=$('#f_'+k);if(!inp)return;if(m==='x'){inp.value='';return}const d=($('#f_date')||$('#f_due')||{}).value,t=($('#f_start')||$('#f_time')||{}).value;if(!d){toast('Set the date first');return}inp.value=alPresetCalc(m,d,t)};
+A.payAl=el=>payAlModal(el.dataset.e,el.dataset.p);
+A.payAlSave=async()=>{const {eid,pi}=U.payAl||{},e=S.expenses.find(x=>x.id===eid),p=e&&(e.payments||[])[+pi];if(!p)return;const o={due:p.due,al1:$('#f_al1').value,al2:$('#f_al2').value},errs=[];validateAlerts('payment',o,errs);if(errs.length){$('#ferr').textContent=errs.join('. ')+'.';return}p.al1=o.al1;p.al2=o.al2;await commit('expenses');closeModal();render();toast('Notifications saved')};
 A.homeDay=el=>{const d=el.dataset.d;U.tab.appointments='month';U.cal={y:+d.slice(0,4),m:+d.slice(5,7)-1};U.calSel=d;go('appointments')};
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='vnnew'){e.preventDefault();A.vnAdd({dataset:{id:U.hubV}})}if(e.key==='Enter'&&e.target&&e.target.id==='newsupcat'){e.preventDefault();A.supCatAdd()}});
 
@@ -2352,6 +2484,9 @@ document.addEventListener('change',async e=>{
   case 'diyStatus':{const d=S.diy.find(x=>x.id===el.dataset.id);d.status=v;await commit('diy');break}
   case 'remDone':{const r=S.reminders.find(x=>x.id===el.dataset.id);r.done=el.checked;await commit('reminders');break}
   case 'gfeed':{S.settings.gfeed=el.checked;await commit('settings');if(el.checked){U.gevAt=0;gcalLoad(true)}else{U.gev=[]}break}
+  case 'gpush':{S.settings.gpush=el.checked;await commit('settings');if(el.checked)gSync();break}
+  case 'gurl':{S.settings.gurl=(v||'').trim();await commit('settings');gSyncSoon();return}
+  case 'gtoken':{S.settings.gtoken=(v||'').trim();await commit('settings');gSyncSoon();return}
   case 'gcat':{S.settings.gcat=S.settings.gcat||{};if(v)S.settings.gcat[el.dataset.u]=v;else delete S.settings.gcat[el.dataset.u];await commit('settings');break}
   case 'calId':{S.settings.calId=(v||'').trim();await commit('settings');toast('Calendar saved');return}
   case 'barSlot':{const cur=barTabs().map(x=>x[0]);const a=[0,1,2,3,4].map(i=>cur[i]||'');a[+el.dataset.i]=v;S.settings.tabs=a.filter(Boolean);await commit('settings');render();custBar();return}
