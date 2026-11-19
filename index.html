@@ -470,7 +470,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
   <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
-  <p class="small muted" id="ver" style="margin-top:10px">Version: v19 plus one column, 13 Nov 2026</p>
+  <p class="small muted" id="ver" style="margin-top:10px">Version: v20 guest bulk edit and order, 13 Nov 2026</p>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
 </div>
@@ -1949,9 +1949,29 @@ function gCell(g,k,sel){switch(k){
  case 'table':return g.table?esc((S.tables.find(t=>t.id===g.table)||{}).name||''):'<span class="muted">—</span>'}return ''}
 function guestColsModal(){const on=gcols().map(c=>c[0]);
  modal(`<div class="mh"><h2>Guest table columns</h2><button class="btn sm primary" data-act="close">Done</button></div><p class="small muted">Choose what shows in the guest table. The guest’s name is always shown. Saved for both of you.</p>${GCOLS.map(([k,l])=>`<label class="chk" style="display:flex;padding:7px 0"><input type="checkbox" data-chg="gcol" data-k="${k}" ${on.includes(k)?'checked':''}> ${l}</label>`).join('')}<div class="acts" style="margin-top:10px"><button class="btn sm" data-act="guestColsReset">Reset to default</button></div>`)}
+const GINV=['To be invited','Considering','Invitation sent'];
+function gSorted(list,so){const idx=new Map(S.guests.map((g,i)=>[g.id,i])),cmp=(a,b)=>String(a||'').localeCompare(String(b||''),'en',{sensitivity:'base'});
+ const by={custom:(a,b)=>idx.get(a.id)-idx.get(b.id),first:(a,b)=>cmp(a.first,b.first)||cmp(a.last,b.last),last:(a,b)=>cmp(a.last||'~',b.last||'~')||cmp(a.first,b.first),group:(a,b)=>cmp(a.group||'~',b.group||'~')||cmp(a.first,b.first),invite:(a,b)=>GINV.indexOf(a.invite)-GINV.indexOf(b.invite)||idx.get(a.id)-idx.get(b.id)};
+ return list.slice().sort(by[so]||by.custom)}
+function guestsView(){const f=(U.gq||'').toLowerCase();
+ const L=S.guests.filter(g=>(!f||(g.first+' '+(g.last||'')+' '+(g.group||'')+' '+(g.diet||'')).toLowerCase().includes(f))&&(!U.gf||(U.gf==='diet'?g.diet:U.gf==='spell'?g.spell==='Needs checking':U.gf==='pending'?(g.ceremony==='Pending'&&g.reception==='Pending'):U.gf==='unassigned'?!g.table:g.invite===U.gf)));
+ return gSorted(L,(S.ui&&S.ui.gsort)||'custom')}
+function gSortSel(){const so=(S.ui&&S.ui.gsort)||'custom';
+ return `<select data-chg="gsort" aria-label="Sort guests">${[['custom','Order: my order'],['first','Order: first name A–Z'],['last','Order: last name A–Z'],['group','Order: group'],['invite','Order: invitation status']].map(([k,l])=>`<option value="${k}" ${so===k?'selected':''}>${l}</option>`).join('')}</select>${so!=='custom'?`<button class="btn sm" data-act="gSortApply" title="Keep this order as your own">Make this my order</button>`:''}`}
+function gBulk(L){const ids=U.gsel||[];if(!ids.length)return '';
+ const opt=(arr,ph)=>`<option value="">${ph}</option>${arr.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join('')}`;
+ return `<div class="card" style="margin:10px 0;position:sticky;top:8px;z-index:5"><div class="row" style="flex-wrap:wrap;gap:8px"><b>${ids.length} selected</b>
+ <select data-chg="gbulk" data-k="invite" aria-label="Set invitation">${opt(GINV.map(x=>[x,x]),'Invitation…')}</select>
+ <select data-chg="gbulk" data-k="ceremony" aria-label="Set ceremony RSVP">${opt(RSVP.map(x=>[x,x]),'Ceremony…')}</select>
+ <select data-chg="gbulk" data-k="reception" aria-label="Set reception RSVP">${opt(RSVP.map(x=>[x,x]),'Reception…')}</select>
+ <select data-chg="gbulk" data-k="spell" aria-label="Set name spelling">${opt([['Needs checking','Needs checking'],['Confirmed','Confirmed ✓'],['__clear','Not checked']],'Spelling…')}</select>
+ <select data-chg="gbulk" data-k="table" aria-label="Set table">${opt([...S.tables.map(t=>[t.id,t.name]),['__clear','No table']],'Table…')}</select>
+ <span class="row" style="gap:4px"><input id="gbgroup" placeholder="Group name" style="width:140px" aria-label="Group name"><button class="btn sm" data-act="gbulkGroup">Set group</button></span>
+ <button class="btn sm" data-act="gbulkPlus" data-v="1">+1: yes</button><button class="btn sm" data-act="gbulkPlus" data-v="0">+1: no</button>
+ <button class="btn sm" data-act="gMoveSel" data-n="top">Move to top</button><button class="btn sm" data-act="gMoveSel" data-n="bottom">Move to bottom</button>
+ <button class="btn sm danger" data-act="gbulkDel">Delete</button><button class="btn sm" data-act="gselClear">Clear</button></div></div>`}
 function pageGuests(){
- const G=S.guests,f=U.gq.toLowerCase();
- const L=G.filter(g=>(!f||(g.first+' '+(g.last||'')+' '+(g.group||'')+' '+(g.diet||'')).toLowerCase().includes(f))&&(!U.gf||(U.gf==='diet'?g.diet:U.gf==='spell'?g.spell==='Needs checking':U.gf==='pending'?(g.ceremony==='Pending'&&g.reception==='Pending'):U.gf==='unassigned'?!g.table:g.invite===U.gf)));
+ const G=S.guests,L=guestsView(),gsel=U.gsel||(U.gsel=[]),reorder=((S.ui&&S.ui.gsort)||'custom')==='custom',allSel=L.length&&L.every(g=>gsel.includes(g.id));
  const n=(fn)=>G.filter(fn).length;
  const plus=n(g=>g.plus1);
  const sel=(g,k)=>`<select data-chg="rsvp" data-id="${g.id}" data-k="${k}" aria-label="${k} RSVP for ${esc(g.first)}">${RSVP.map(r=>`<option ${g[k]===r?'selected':''}>${r}</option>`).join('')}</select>`;
@@ -1959,8 +1979,8 @@ function pageGuests(){
  `<input type="file" id="gfile" accept=".csv,text/csv" hidden data-chg="gfile">
  <div class="grid g4" style="margin-bottom:16px">${[['👥 On the list',G.length],['✉️ Invitations sent',n(g=>g.invite==='Invitation sent')],['✅ Confirmed (either event)',n(attending)],['❌ Declined both',n(g=>g.ceremony==='No'&&g.reception==='No')],['⏳ Awaiting RSVP',n(g=>g.invite==='Invitation sent'&&g.ceremony==='Pending'&&g.reception==='Pending')],['🤔 Considering',n(g=>g.invite==='Considering')],['✏️ Spelling to check',n(g=>g.spell==='Needs checking')],['➕ Plus-ones',plus],['⛪ Ceremony: yes',n(g=>g.ceremony==='Yes')+n(g=>g.ceremony==='Yes'&&g.plus1)],['🥂 Reception: yes',n(g=>g.reception==='Yes')+n(g=>g.reception==='Yes'&&g.plus1)]].map(([l,v])=>`<div class="stat" style="cursor:default"><span class="l">${l}</span><span class="v">${v}</span></div>`).join('')}</div>
  ${(()=>{const hd=g=>1+(g.plus1?1:0),sure=G.filter(g=>g.invite!=='Considering'),mb=G.filter(g=>g.invite==='Considering');return mb.length?`<p class="small">🤔 <b>${sum(sure,hd)}</b> people if you invite only the definites, <b>${sum(G,hd)}</b> if every “considering” guest is invited (${mb.length} still undecided).</p>`:''})()}<p class="small muted">Event counts include plus-ones for guests who have said yes. Your target is about ${S.settings.guests||0} guests.</p>
- ${G.length?`<div class="filters"><input id="gq" type="search" placeholder="Search guests" value="${esc(U.gq)}" data-in="gq" aria-label="Search guests"><select data-chg="gf" aria-label="Filter"><option value="">All guests</option><option value="To be invited" ${U.gf==='To be invited'?'selected':''}>To be invited</option><option value="Considering" ${U.gf==='Considering'?'selected':''}>Considering</option><option value="Invitation sent" ${U.gf==='Invitation sent'?'selected':''}>Invitation sent</option><option value="pending" ${U.gf==='pending'?'selected':''}>RSVP pending</option><option value="diet" ${U.gf==='diet'?'selected':''}>Has dietary needs</option><option value="spell" ${U.gf==='spell'?'selected':''}>Spelling needs checking</option><option value="unassigned" ${U.gf==='unassigned'?'selected':''}>No table yet</option></select></div>
- <div class="card scroll"><table class="t"><thead><tr><th>Guest</th>${gcols().map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${L.slice(0,300).map(g=>`<tr${g.invite==='Considering'?' style="opacity:.78"':''}><td><a href="#" data-act="open" data-ent="guest" data-id="${g.id}" style="color:inherit"><b>${esc((g.first+' '+(g.last||'')).trim())}</b></a>${g.plus1?' <span class="muted small">+1</span>':''}${g.spell==='Needs checking'?' <span title="Check the spelling of this name">✏️</span>':''}${isEx(g)}</td>${gcols().map(c=>`<td>${gCell(g,c[0],sel)}</td>`).join('')}</tr>`).join('')}</tbody></table>${L.length>300?`<p class="small muted">Showing the first 300 of ${L.length}. Use search to narrow the list.</p>`:''}${!L.length?'<p class="muted">No guests match.</p>':''}</div>`:emptyBox('No guests yet','Add guests one at a time, or import a CSV with columns first, last, group, diet, email.',`<button class="btn primary" data-act="open" data-ent="guest">Add a guest</button>`)}`;
+ ${G.length?`<div class="filters"><input id="gq" type="search" placeholder="Search guests" value="${esc(U.gq)}" data-in="gq" aria-label="Search guests"><select data-chg="gf" aria-label="Filter"><option value="">All guests</option><option value="To be invited" ${U.gf==='To be invited'?'selected':''}>To be invited</option><option value="Considering" ${U.gf==='Considering'?'selected':''}>Considering</option><option value="Invitation sent" ${U.gf==='Invitation sent'?'selected':''}>Invitation sent</option><option value="pending" ${U.gf==='pending'?'selected':''}>RSVP pending</option><option value="diet" ${U.gf==='diet'?'selected':''}>Has dietary needs</option><option value="spell" ${U.gf==='spell'?'selected':''}>Spelling needs checking</option><option value="unassigned" ${U.gf==='unassigned'?'selected':''}>No table yet</option></select>${gSortSel()}</div>${gBulk(L)}
+ <div class="card scroll"><table class="t"><thead><tr><th style="width:34px"><input type="checkbox" data-chg="gselall" ${allSel?'checked':''} aria-label="Select all shown"></th><th>Guest</th>${gcols().map(c=>`<th>${c[1]}</th>`).join('')}${reorder?'<th></th>':''}</tr></thead><tbody>${L.slice(0,300).map(g=>`<tr style="${g.invite==='Considering'?'opacity:.78;':''}${gsel.includes(g.id)?'background:rgba(201,128,143,.14);':''}"><td><input type="checkbox" data-chg="gsel" data-id="${g.id}" ${gsel.includes(g.id)?'checked':''} aria-label="Select ${esc(g.first)}"></td><td><a href="#" data-act="open" data-ent="guest" data-id="${g.id}" style="color:inherit"><b>${esc((g.first+' '+(g.last||'')).trim())}</b></a>${g.plus1?' <span class="muted small">+1</span>':''}${g.spell==='Needs checking'?' <span title="Check the spelling of this name">✏️</span>':''}${isEx(g)}</td>${gcols().map(c=>`<td>${gCell(g,c[0],sel)}</td>`).join('')}${reorder?`<td style="white-space:nowrap"><button class="btn sm" data-act="gMove" data-id="${g.id}" data-n="-1" aria-label="Move ${esc(g.first)} up">↑</button> <button class="btn sm" data-act="gMove" data-id="${g.id}" data-n="1" aria-label="Move ${esc(g.first)} down">↓</button></td>`:''}</tr>`).join('')}</tbody></table>${L.length>300?`<p class="small muted">Showing the first 300 of ${L.length}. Use search to narrow the list.</p>`:''}${!L.length?'<p class="muted">No guests match.</p>':''}</div>`:emptyBox('No guests yet','Add guests one at a time, or import a CSV with columns first, last, group, diet, email.',`<button class="btn primary" data-act="open" data-ent="guest">Add a guest</button>`)}`;
 }
 
 /* ============ design studio ============ */
@@ -2474,6 +2494,13 @@ Object.assign(A,{
 });
 A.gRefresh=()=>gcalLoad(true);
 A.gSyncNow=()=>gSync();
+A.gselClear=()=>{U.gsel=[];render()};
+A.gbulkGroup=async()=>{const v=($('#gbgroup')||{}).value.trim(),ids=U.gsel||[];if(!v||!ids.length){toast('Type a group name first');return}S.guests.forEach(g=>{if(ids.includes(g.id))g.group=v});await commit('guests');render();toast(ids.length+' updated')};
+A.gbulkPlus=async el=>{const ids=U.gsel||[],on=el.dataset.v==='1';S.guests.forEach(g=>{if(ids.includes(g.id))g.plus1=on});await commit('guests');render();toast(ids.length+' updated')};
+A.gbulkDel=()=>{const ids=(U.gsel||[]).slice();if(!ids.length)return;ask('Delete '+ids.length+' guest'+(ids.length>1?'s':'')+'? This can’t be undone.',async()=>{S.guests=S.guests.filter(g=>!ids.includes(g.id));U.gsel=[];await commit('guests');render();toast('Deleted')})};
+A.gMove=async el=>{const L=guestsView(),i=L.findIndex(x=>x.id===el.dataset.id),j=i+(+el.dataset.n);if(i<0||j<0||j>=L.length)return;const a=S.guests.indexOf(L[i]),b=S.guests.indexOf(L[j]);[S.guests[a],S.guests[b]]=[S.guests[b],S.guests[a]];await commit('guests');render()};
+A.gMoveSel=async el=>{const ids=U.gsel||[],sel=S.guests.filter(g=>ids.includes(g.id)),rest=S.guests.filter(g=>!ids.includes(g.id));S.guests=el.dataset.n==='top'?[...sel,...rest]:[...rest,...sel];S.ui.gsort='custom';await commit('guests','ui');render();toast('Moved')};
+A.gSortApply=async()=>{const so=S.ui.gsort;S.guests=gSorted(S.guests,so);S.ui.gsort='custom';await commit('guests','ui');render();toast('Saved as your order')};
 A.guestCols=()=>guestColsModal();
 A.guestColsReset=async()=>{S.settings.gcols=null;await commit('settings');render();guestColsModal()};
 A.alCustom=el=>{const k=el.dataset.k,inp=$('#f_'+k),n=+($('#c_'+k+'_n')||{}).value,u=+($('#c_'+k+'_u')||{}).value;if(!inp)return;
@@ -2553,6 +2580,10 @@ document.addEventListener('change',async e=>{
   case 'remDone':{const r=S.reminders.find(x=>x.id===el.dataset.id);r.done=el.checked;await commit('reminders');break}
   case 'gfeed':{S.settings.gfeed=el.checked;await commit('settings');if(el.checked){U.gevAt=0;gcalLoad(true)}else{U.gev=[]}break}
   case 'gemail':{S.settings.gemail=el.checked;await commit('settings');gSyncSoon();break}
+  case 'gsort':{S.ui.gsort=v;await commit('ui');break}
+  case 'gsel':{const y=window.scrollY,a=U.gsel||(U.gsel=[]),id=el.dataset.id;if(el.checked){if(!a.includes(id))a.push(id)}else U.gsel=a.filter(x=>x!==id);render();window.scrollTo(0,y);return}
+  case 'gselall':{const y=window.scrollY;U.gsel=el.checked?guestsView().map(g=>g.id):[];render();window.scrollTo(0,y);return}
+  case 'gbulk':{const k=el.dataset.k,ids=U.gsel||[];if(!v||!ids.length)break;const val=v==='__clear'?'':v;S.guests.forEach(g=>{if(ids.includes(g.id))g[k]=val});await commit('guests');toast(ids.length+' updated');break}
   case 'gplus':{const g=S.guests.find(x=>x.id===el.dataset.id);g.plus1=el.checked;await commit('guests');break}
   case 'gspell':{const g=S.guests.find(x=>x.id===el.dataset.id);g.spell=v;await commit('guests');break}
   case 'gcol':{const cur=gcols().map(c=>c[0]),k=el.dataset.k,next=el.checked?[...cur,k]:cur.filter(x=>x!==k);S.settings.gcols=next;await commit('settings');break}
