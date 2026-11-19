@@ -470,7 +470,7 @@ input,select,textarea{border-radius:10px!important;border-color:rgba(191,157,156
   <label class="f"><span>Password</span><input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
   <div class="authactions"><button class="btn primary" id="auth-signin">Sign in</button><button class="btn" id="auth-signup">Create account</button><button class="btn" id="auth-forgot" type="button">Forgot password?</button></div>
   <div class="authstatus" id="auth-status" role="status" aria-live="polite"></div>
-  <p class="small muted" id="ver" style="margin-top:10px">Version: v17 custom notification times, 13 Nov 2026</p>
+  <p class="small muted" id="ver" style="margin-top:10px">Version: v19 plus one column, 13 Nov 2026</p>
   <p class="authhint">First person to create an account starts the shared plan. Once signed in, use “Invite partner” to add the other person by email. Your Supabase project must be configured before this screen can sign in.</p>
  </section>
 </div>
@@ -936,7 +936,7 @@ async function enterPlanner(){
 const CATNAMES=['Venue hire','Catering','Alcohol and beverages','Ceremony','Photography','Videography','Florals','Styling and decor','Furniture and equipment hire','Lighting and production','Entertainment and music','Wedding attire','Hair and makeup','Rings and jewellery','Stationery and invitations','Cake and desserts','Celebrant','Transport','Accommodation','Guest favours','Gifts','Wedding planner','Legal and administrative','Insurance','Post-wedding expenses','Miscellaneous','Contingency'];
 const SPLIT={'Venue hire':20,'Catering':20,'Alcohol and beverages':6,'Ceremony':2,'Photography':8,'Videography':4,'Florals':6,'Styling and decor':5,'Furniture and equipment hire':3,'Lighting and production':2,'Entertainment and music':5,'Wedding attire':5,'Hair and makeup':2,'Rings and jewellery':2,'Stationery and invitations':1,'Cake and desserts':1,'Celebrant':1,'Transport':1,'Guest favours':1,'Contingency':5};
 const DEF={
- settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,gcat:{},ecats:[],gpush:false,gemail:false,gurl:'',gtoken:'',gmap:{},vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
+ settings:{onboarded:false,petals:true,petalStyle:'blossom',title:'Our wedding',names:'',date:'',location:'Blacktown, NSW',style:'Romantic, nature-inspired, elegant, editorial and artistic',currency:'AUD',budget:4000000,min:3000000,max:5000000,guests:200,quoteAlertPct:20,dueDays:7,curtainBackground:'',calId:'',gfeed:false,gcat:{},ecats:[],gpush:false,gemail:false,gcols:null,gurl:'',gtoken:'',gmap:{},vsections:[],supcats:[],arch_appointments:'',arch_diy:'',arch_dashboard:'',arch_budget:'',arch_venues:'',arch_suppliers:'',arch_tasks:'',arch_guests:'',arch_studio:'',arch_seating:'',arch_runsheet:'',arch_notes:'',arch_private:'',arch_settings:''},
  cats:CATNAMES.map((n,i)=>({id:'c'+i,name:n,alloc:0,color:COLORS[i%COLORS.length],arch:false})),
  expenses:[],tasks:[],appts:[],reminders:[],diy:[],venues:[],suppliers:[],guests:[],items:[],palettes:[],links:[],tables:[],runsheet:[],notes:[],decisions:[],
  boards:['Overall wedding vision','Ceremony','Reception','Flowers','Tablescapes','Wedding attire','Stationery','Lighting'].map((n,i)=>({id:'b'+i,name:n})),
@@ -1470,6 +1470,7 @@ ENT.diy={coll:'diy',label:'DIY / decor item',page:'diy',title:r=>r.title,default
  ENT.venue.fields.splice(i+1,0,{k:'ab',l:'',cl:'📅 Appointment booked',t:'checkbox'},{k:'vis',l:'',cl:'👀 Viewed / visited',t:'checkbox'},{k:'love',l:'',cl:'💗 Loved (shows at the top)',t:'checkbox'},{k:'cmp',l:'',cl:'⚖️ Include in comparison',t:'checkbox'});
  ENT.venue.extra=r=>`<p class="small muted" style="margin:6px 0 14px">⭐ Highlights, notes and your own sections are on the venue tile: use the <b>✎ Notes</b> button there.</p>`}
 /* guests: considering */
+{const gf=ENT.guest.fields,i=gf.findIndex(f=>f.k==='last');gf.splice(i+1,0,{k:'spell',l:'Name spelling',t:'select',o:()=>[['','Not checked'],['Needs checking','Needs checking'],['Confirmed','Confirmed ✓']]})}
 ENT.guest.fields.find(f=>f.k==='invite').o=opt(['To be invited','Considering','Invitation sent']);
 /* suppliers: custom categories */
 const supCats=()=>{const c=(S.settings&&S.settings.supcats)||[];return [...SUPCAT.filter(x=>x!=='Other'),...c.filter(x=>!SUPCAT.includes(x)),'Other']};
@@ -1931,18 +1932,35 @@ function proposeSchedule(){
 }
 /* ============ guests ============ */
 const attending=g=>g.ceremony==='Yes'||g.reception==='Yes';
+const GCOLS=[['group','Group'],['plus1','Plus one'],['rel','Relationship'],['invite','Invitation'],['ceremony','Ceremony'],['reception','Reception'],['spell','Name spelling'],['diet','Dietary'],['access','Accessibility'],['email','Email'],['table','Table']];
+const GCOL_DEF=['group','plus1','invite','ceremony','reception','spell','diet','table'];
+const gcols=()=>{const k=Array.isArray(S.settings.gcols)?S.settings.gcols:GCOL_DEF;return GCOLS.filter(c=>k.includes(c[0]))};
+function gCell(g,k,sel){switch(k){
+ case 'group':return esc(g.group||'');
+ case 'rel':return esc(g.rel||'');
+ case 'plus1':return `<input type="checkbox" data-chg="gplus" data-id="${g.id}" ${g.plus1?'checked':''} aria-label="Plus one for ${esc(g.first)}">`;
+ case 'invite':return `<select data-chg="ginv" data-id="${g.id}" aria-label="Invitation status for ${esc(g.first)}">${['To be invited','Considering','Invitation sent'].map(x=>`<option ${g.invite===x?'selected':''}>${x}</option>`).join('')}</select>`;
+ case 'ceremony':return sel(g,'ceremony');
+ case 'reception':return sel(g,'reception');
+ case 'spell':return `<select data-chg="gspell" data-id="${g.id}" aria-label="Name spelling for ${esc(g.first)}"><option value="">Not checked</option><option value="Needs checking" ${g.spell==='Needs checking'?'selected':''}>Needs checking</option><option value="Confirmed" ${g.spell==='Confirmed'?'selected':''}>Confirmed ✓</option></select>`;
+ case 'diet':return esc(g.diet||'');
+ case 'access':return esc(g.access||'');
+ case 'email':return esc(g.email||'');
+ case 'table':return g.table?esc((S.tables.find(t=>t.id===g.table)||{}).name||''):'<span class="muted">—</span>'}return ''}
+function guestColsModal(){const on=gcols().map(c=>c[0]);
+ modal(`<div class="mh"><h2>Guest table columns</h2><button class="btn sm primary" data-act="close">Done</button></div><p class="small muted">Choose what shows in the guest table. The guest’s name is always shown. Saved for both of you.</p>${GCOLS.map(([k,l])=>`<label class="chk" style="display:flex;padding:7px 0"><input type="checkbox" data-chg="gcol" data-k="${k}" ${on.includes(k)?'checked':''}> ${l}</label>`).join('')}<div class="acts" style="margin-top:10px"><button class="btn sm" data-act="guestColsReset">Reset to default</button></div>`)}
 function pageGuests(){
  const G=S.guests,f=U.gq.toLowerCase();
- const L=G.filter(g=>(!f||(g.first+' '+(g.last||'')+' '+(g.group||'')+' '+(g.diet||'')).toLowerCase().includes(f))&&(!U.gf||(U.gf==='diet'?g.diet:U.gf==='pending'?(g.ceremony==='Pending'&&g.reception==='Pending'):U.gf==='unassigned'?!g.table:g.invite===U.gf)));
+ const L=G.filter(g=>(!f||(g.first+' '+(g.last||'')+' '+(g.group||'')+' '+(g.diet||'')).toLowerCase().includes(f))&&(!U.gf||(U.gf==='diet'?g.diet:U.gf==='spell'?g.spell==='Needs checking':U.gf==='pending'?(g.ceremony==='Pending'&&g.reception==='Pending'):U.gf==='unassigned'?!g.table:g.invite===U.gf)));
  const n=(fn)=>G.filter(fn).length;
  const plus=n(g=>g.plus1);
  const sel=(g,k)=>`<select data-chg="rsvp" data-id="${g.id}" data-k="${k}" aria-label="${k} RSVP for ${esc(g.first)}">${RSVP.map(r=>`<option ${g[k]===r?'selected':''}>${r}</option>`).join('')}</select>`;
- return hdr('Guests & RSVPs','Track invitations and RSVPs for each event. Nothing is sent from here: you send invitations yourself.',`<button class="btn" data-act="pasteGuests">Paste names</button><button class="btn" data-act="importGuests">Import CSV</button><button class="btn" data-act="dietSummary">Dietary summary</button><button class="btn" data-act="exportGuests">Export CSV</button><button class="btn primary" data-act="open" data-ent="guest">+ Guest</button>`)+
+ return hdr('Guests & RSVPs','Track invitations and RSVPs for each event. Nothing is sent from here: you send invitations yourself.',`<button class="btn" data-act="guestCols">Columns</button><button class="btn" data-act="pasteGuests">Paste names</button><button class="btn" data-act="importGuests">Import CSV</button><button class="btn" data-act="dietSummary">Dietary summary</button><button class="btn" data-act="exportGuests">Export CSV</button><button class="btn primary" data-act="open" data-ent="guest">+ Guest</button>`)+
  `<input type="file" id="gfile" accept=".csv,text/csv" hidden data-chg="gfile">
- <div class="grid g4" style="margin-bottom:16px">${[['👥 On the list',G.length],['✉️ Invitations sent',n(g=>g.invite==='Invitation sent')],['✅ Confirmed (either event)',n(attending)],['❌ Declined both',n(g=>g.ceremony==='No'&&g.reception==='No')],['⏳ Awaiting RSVP',n(g=>g.invite==='Invitation sent'&&g.ceremony==='Pending'&&g.reception==='Pending')],['🤔 Considering',n(g=>g.invite==='Considering')],['➕ Plus-ones',plus],['⛪ Ceremony: yes',n(g=>g.ceremony==='Yes')+n(g=>g.ceremony==='Yes'&&g.plus1)],['🥂 Reception: yes',n(g=>g.reception==='Yes')+n(g=>g.reception==='Yes'&&g.plus1)]].map(([l,v])=>`<div class="stat" style="cursor:default"><span class="l">${l}</span><span class="v">${v}</span></div>`).join('')}</div>
+ <div class="grid g4" style="margin-bottom:16px">${[['👥 On the list',G.length],['✉️ Invitations sent',n(g=>g.invite==='Invitation sent')],['✅ Confirmed (either event)',n(attending)],['❌ Declined both',n(g=>g.ceremony==='No'&&g.reception==='No')],['⏳ Awaiting RSVP',n(g=>g.invite==='Invitation sent'&&g.ceremony==='Pending'&&g.reception==='Pending')],['🤔 Considering',n(g=>g.invite==='Considering')],['✏️ Spelling to check',n(g=>g.spell==='Needs checking')],['➕ Plus-ones',plus],['⛪ Ceremony: yes',n(g=>g.ceremony==='Yes')+n(g=>g.ceremony==='Yes'&&g.plus1)],['🥂 Reception: yes',n(g=>g.reception==='Yes')+n(g=>g.reception==='Yes'&&g.plus1)]].map(([l,v])=>`<div class="stat" style="cursor:default"><span class="l">${l}</span><span class="v">${v}</span></div>`).join('')}</div>
  ${(()=>{const hd=g=>1+(g.plus1?1:0),sure=G.filter(g=>g.invite!=='Considering'),mb=G.filter(g=>g.invite==='Considering');return mb.length?`<p class="small">🤔 <b>${sum(sure,hd)}</b> people if you invite only the definites, <b>${sum(G,hd)}</b> if every “considering” guest is invited (${mb.length} still undecided).</p>`:''})()}<p class="small muted">Event counts include plus-ones for guests who have said yes. Your target is about ${S.settings.guests||0} guests.</p>
- ${G.length?`<div class="filters"><input id="gq" type="search" placeholder="Search guests" value="${esc(U.gq)}" data-in="gq" aria-label="Search guests"><select data-chg="gf" aria-label="Filter"><option value="">All guests</option><option value="To be invited" ${U.gf==='To be invited'?'selected':''}>To be invited</option><option value="Considering" ${U.gf==='Considering'?'selected':''}>Considering</option><option value="Invitation sent" ${U.gf==='Invitation sent'?'selected':''}>Invitation sent</option><option value="pending" ${U.gf==='pending'?'selected':''}>RSVP pending</option><option value="diet" ${U.gf==='diet'?'selected':''}>Has dietary needs</option><option value="unassigned" ${U.gf==='unassigned'?'selected':''}>No table yet</option></select></div>
- <div class="card scroll"><table class="t"><thead><tr><th>Guest</th><th>Group</th><th>Invitation</th><th>Ceremony</th><th>Reception</th><th>Dietary</th><th>Table</th></tr></thead><tbody>${L.slice(0,300).map(g=>`<tr${g.invite==='Considering'?' style="opacity:.78"':''}><td><a href="#" data-act="open" data-ent="guest" data-id="${g.id}" style="color:inherit"><b>${esc((g.first+' '+(g.last||'')).trim())}</b></a>${g.plus1?' <span class="muted small">+1</span>':''}${isEx(g)}</td><td>${esc(g.group||'')}</td><td><select data-chg="ginv" data-id="${g.id}" aria-label="Invitation status for ${esc(g.first)}">${['To be invited','Considering','Invitation sent'].map(x=>`<option ${g.invite===x?'selected':''}>${x}</option>`).join('')}</select></td><td>${sel(g,'ceremony')}</td><td>${sel(g,'reception')}</td><td>${esc(g.diet||'')}</td><td>${g.table?esc((S.tables.find(t=>t.id===g.table)||{}).name||''):'<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table>${L.length>300?`<p class="small muted">Showing the first 300 of ${L.length}. Use search to narrow the list.</p>`:''}${!L.length?'<p class="muted">No guests match.</p>':''}</div>`:emptyBox('No guests yet','Add guests one at a time, or import a CSV with columns first, last, group, diet, email.',`<button class="btn primary" data-act="open" data-ent="guest">Add a guest</button>`)}`;
+ ${G.length?`<div class="filters"><input id="gq" type="search" placeholder="Search guests" value="${esc(U.gq)}" data-in="gq" aria-label="Search guests"><select data-chg="gf" aria-label="Filter"><option value="">All guests</option><option value="To be invited" ${U.gf==='To be invited'?'selected':''}>To be invited</option><option value="Considering" ${U.gf==='Considering'?'selected':''}>Considering</option><option value="Invitation sent" ${U.gf==='Invitation sent'?'selected':''}>Invitation sent</option><option value="pending" ${U.gf==='pending'?'selected':''}>RSVP pending</option><option value="diet" ${U.gf==='diet'?'selected':''}>Has dietary needs</option><option value="spell" ${U.gf==='spell'?'selected':''}>Spelling needs checking</option><option value="unassigned" ${U.gf==='unassigned'?'selected':''}>No table yet</option></select></div>
+ <div class="card scroll"><table class="t"><thead><tr><th>Guest</th>${gcols().map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${L.slice(0,300).map(g=>`<tr${g.invite==='Considering'?' style="opacity:.78"':''}><td><a href="#" data-act="open" data-ent="guest" data-id="${g.id}" style="color:inherit"><b>${esc((g.first+' '+(g.last||'')).trim())}</b></a>${g.plus1?' <span class="muted small">+1</span>':''}${g.spell==='Needs checking'?' <span title="Check the spelling of this name">✏️</span>':''}${isEx(g)}</td>${gcols().map(c=>`<td>${gCell(g,c[0],sel)}</td>`).join('')}</tr>`).join('')}</tbody></table>${L.length>300?`<p class="small muted">Showing the first 300 of ${L.length}. Use search to narrow the list.</p>`:''}${!L.length?'<p class="muted">No guests match.</p>':''}</div>`:emptyBox('No guests yet','Add guests one at a time, or import a CSV with columns first, last, group, diet, email.',`<button class="btn primary" data-act="open" data-ent="guest">Add a guest</button>`)}`;
 }
 
 /* ============ design studio ============ */
@@ -2456,6 +2474,8 @@ Object.assign(A,{
 });
 A.gRefresh=()=>gcalLoad(true);
 A.gSyncNow=()=>gSync();
+A.guestCols=()=>guestColsModal();
+A.guestColsReset=async()=>{S.settings.gcols=null;await commit('settings');render();guestColsModal()};
 A.alCustom=el=>{const k=el.dataset.k,inp=$('#f_'+k),n=+($('#c_'+k+'_n')||{}).value,u=+($('#c_'+k+'_u')||{}).value;if(!inp)return;
  const d=($('#f_date')||$('#f_due')||{}).value,t=($('#f_start')||$('#f_time')||{}).value;
  if(!d){toast('Set the date first');return}if(!n||n<=0){toast('Type how many hours, minutes or days');return}
@@ -2533,6 +2553,9 @@ document.addEventListener('change',async e=>{
   case 'remDone':{const r=S.reminders.find(x=>x.id===el.dataset.id);r.done=el.checked;await commit('reminders');break}
   case 'gfeed':{S.settings.gfeed=el.checked;await commit('settings');if(el.checked){U.gevAt=0;gcalLoad(true)}else{U.gev=[]}break}
   case 'gemail':{S.settings.gemail=el.checked;await commit('settings');gSyncSoon();break}
+  case 'gplus':{const g=S.guests.find(x=>x.id===el.dataset.id);g.plus1=el.checked;await commit('guests');break}
+  case 'gspell':{const g=S.guests.find(x=>x.id===el.dataset.id);g.spell=v;await commit('guests');break}
+  case 'gcol':{const cur=gcols().map(c=>c[0]),k=el.dataset.k,next=el.checked?[...cur,k]:cur.filter(x=>x!==k);S.settings.gcols=next;await commit('settings');break}
   case 'gpush':{S.settings.gpush=el.checked;await commit('settings');if(el.checked)gSync();break}
   case 'gurl':{S.settings.gurl=(v||'').trim();await commit('settings');gSyncSoon();return}
   case 'gtoken':{S.settings.gtoken=(v||'').trim();await commit('settings');gSyncSoon();return}
